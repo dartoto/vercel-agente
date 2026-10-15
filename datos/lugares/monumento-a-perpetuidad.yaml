@@ -1,0 +1,42 @@
+nombre: Monumento a Perpetuidad
+id: monumento-a-perpetuidad
+categoria: historico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: El Monumento a Perpetuidad, es un antiguo camposanto ubicado en
+  Paysandú que inició sus prácticas funerarias en 1835 para sustituir al cementerio
+  parroquial original.
+descripcion_larga: "Su construcción se completó hacia 1853, destacándose la capilla\
+  \ neoclásica con elementos neogóticos, edificada en 1858 bajo la dirección del maestro\
+  \ de obras Francisco Poncini. \n\nEn 1881, gracias a la iniciativa del filántropo\
+  \ Luis Galán y Rocha, fue declarado Monumento Público Departamental a Perpetuidad\
+  \ mediante la Ley 1555, prohibiéndose nuevos enterramientos y reconvirtiéndolo en\
+  \ un paseo-jardín al estilo de las necrópolis europeas de la época.  Seis años después,\
+  \ en 1887, el agrimensor José M. Guerrín planificó su transformación en una necrópolis\
+  \ moderna con caminos estilo afrancesado. \n\nEl 29 de enero de 2004, fue declarado\
+  \ Monumento Histórico Nacional por la calidad de sus obras artísticas.  Desde 2006,\
+  \ funciona como el primer y único cementerio-museo del país, dependiente de la Intendencia\
+  \ de Paysandú, albergando restos de caídos en la Defensa de Paysandú y destacadas\
+  \ personalidades, con esculturas de artistas italianos como Giovanni del Vecchio\
+  \ y José Livi."
+direccion: calle Montecaseros entre Gral.Artigas y Av. Soriano, Paysandú.
+lat: -32.3247
+lon: -58.08
+accesible: true
+gratuito: true
+motivos_singularidad:
+- contiene importantes esculturas en mármil creadas por artistas italianos
+- alberga restos de caídos en la defensa de paysandú.
+etiquetas:
+- historico
+- cementerio
+- arte
+- religión
+curiosidades:
+- desde 2006 funciona como primer cementerio museo del país
+- se destaca la capilla neoclásica con elementos neogóticos
+- edificada en 1858 bajo la dirección del maestro de obras Francisco Poncini.
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

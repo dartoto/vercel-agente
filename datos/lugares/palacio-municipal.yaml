@@ -1,0 +1,23 @@
+id: palacio-municipal
+nombre: Palacio Municipal
+categoria: cultural
+descripcion_corta: El Palacio Municipal de Paysandú fue construido en 1926.
+singularidad: 3
+motivos_singularidad:
+- Construcción de 100 años
+- Trabaja el intendente
+nivel_masificacion: medio
+accesible: true
+gratuito: true
+lat: -32.3191106
+lon: -58.0819786 
+direccion: Sarandí 1199, Paysandú
+curiosidades: []
+etiquetas:
+- Patrimonio
+- Administración
+- Arquitectura
+transporte_recomendado: a pie
+fotos: []
+cerca_de: []
+fuente: Investigación propia (usuario)

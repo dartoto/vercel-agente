@@ -1,0 +1,25 @@
+nombre: Confitería El Chajá
+id: confiteria-el-chaja
+categoria: gastronomico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Emblemática confitería, reconocida en todo el país por su inigualable
+  Postre Chajá. Además todo tipo de postres y comidas rápidas para el desayuno y almuerzo.
+direccion: 18 de Julio y calle Luis Alberto de Herrera
+lat: -32.317299
+lon: -58.082389
+accesible: true
+gratuito: true
+motivos_singularidad:
+- Se fabrica el postre icónico de Paysandú
+- el postre Chajá.
+etiquetas:
+- comidas
+- postres
+- confiteria
+- historico
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

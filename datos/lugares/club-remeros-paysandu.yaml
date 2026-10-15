@@ -1,0 +1,23 @@
+nombre: Club Remeros Paysandú
+id: club-remeros-paysandu
+categoria: cultural
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Club deportivo de importante presencia para la sociedad sanducera.
+  Formador de grandes remeros y nadadores destacados a nivel internacional.
+direccion: ''
+lat: -32.2121
+lon: -58.3223
+accesible: false
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- deportes
+- historico
+- social
+- deportivo
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

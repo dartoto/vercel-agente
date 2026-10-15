@@ -1,0 +1,22 @@
+nombre: Parque infantil
+id: parque-infantil
+categoria: otro
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Espacio de juegos infantiles para disfrutar en familia en la cercanía
+  del Río Uruguay.
+direccion: Avda.de los Deportistas y Batlle y Ordoñez.
+lat: -32.2121
+lon: -58.3232
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- esparcimiento
+- juegos infantiles
+- parque.
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

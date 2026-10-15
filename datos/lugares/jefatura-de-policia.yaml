@@ -1,0 +1,21 @@
+nombre: Jefatura de Policia
+id: jefatura-de-policia
+categoria: historico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Principal agencia de la Policía en Paysandú.
+direccion: calle Leandro Gómez y calle Montevideo, Paysandú.
+lat: -32.1111
+lon: -58.3333
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- historico
+- servicio
+- arquitectura.
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

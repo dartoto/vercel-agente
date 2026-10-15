@@ -1,0 +1,32 @@
+id: centro-cultural-gobbi
+nombre: Centro Cultural Gobbi
+categoria: cultural
+descripcion_corta: Funciona en un edificio histórico, donde estuvo el popular cine
+  Astor desde 1939 a 1980, edificio diseñado por el Arq.Oscar Garrasino.
+singularidad: 3
+motivos_singularidad:
+- Complementa el arte con la historia
+- sala ideal para eventos culturales.
+nivel_masificacion: medio
+accesible: true
+gratuito: false
+lat: -32.31605430203669
+lon: -58.09075363051053
+direccion: 18 de Julio 773, Paysandú
+curiosidades: []
+etiquetas:
+- cultura
+- arquitectura
+- arte
+- historia.
+fotos: []
+cerca_de: []
+descripcion_larga: "El Espacio Cultural Gobbi, ubicado en Paysandú, ocupa el antiguo\
+  \ edificio donde funcionó durante décadas el Cine Astor.  El recinto fue remodelado\
+  \ y reinaugurado por la Intendencia de Paysandú el 16 de octubre de 2019 como un\
+  \ multi espacio cultural. \n\nLa iniciativa busca rendir homenaje y memoria al excepcional\
+  \ artista sanducero Alfredo Eusebio Gobbi.  La magnífica sala ha sido adaptada para\
+  \ acoger diversas disciplinas artísticas, incluyendo teatro, danza y espectáculos\
+  \ culturales."
+transporte_recomendado: a pie
+fuente: Investigación propia

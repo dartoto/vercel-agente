@@ -1,0 +1,39 @@
+nombre: Shopping Terminal Paysandú
+id: shopping-terminal-paysandu
+categoria: gastronomico
+singularidad: 4
+nivel_masificacion: alto
+descripcion_corta: Terminal de ómnibus y principal Centro Comercial de Paysandú. Incluye
+  supermercado, casas de cambio, cajeros automáticos y locales de gastronomía.
+descripcion_larga: 'El Paysandú Shopping Terminal fue inaugurado el 13 de octubre
+  de 2016.  El corte de cinta se realizó ese jueves, y al día siguiente (viernes 14)
+  abrió oficialmente sus puertas al público.Es un centro comercial integrado a la
+  terminal de ómnibus, diseñado como un punto de encuentro para viajeros y locales.  Sus
+  características principales incluyen:
+
+
+  Comercios: Ofrece una variedad de tiendas de moda (femenina, masculina e infantil)
+  y artículos de marca. También cuenta con un supermercado y opciones gastronómicas.
+
+  Instalaciones: Dispone de un amplio estacionamiento y patios de comidas.  Algunos
+  usuarios destacan la limpieza y la distribución prolija de los locales.'
+direccion: Blvd Artigas 770, Paysandú.
+lat: -32.3211
+lon: -58.0683
+accesible: true
+gratuito: true
+motivos_singularidad:
+- Tiene un supercado integrado
+- cajeros automáticos
+- casas de cambio
+- locales gastronómicas.
+etiquetas:
+- compras
+- gastronómico
+- arquitectura
+- moderno.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

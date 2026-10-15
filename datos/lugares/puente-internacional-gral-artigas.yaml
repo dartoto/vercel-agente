@@ -1,0 +1,22 @@
+nombre: Puente Internacional Gral.Artigas
+id: puente-internacional-gral-artigas
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Puente Internacional que une las ciudades de Paysandú(Uruguay)
+  y Colón (Argentina).
+direccion: Avda.de las Américas y Costanera Norte.
+lat: -32.26476114813683
+lon: -58.097909970869594
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- puente internacional
+- turismo
+- arquitectura
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

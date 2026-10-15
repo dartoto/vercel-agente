@@ -1,0 +1,45 @@
+nombre: Plaza Constitución
+id: plaza-constitucion
+categoria: historico
+singularidad: 4
+nivel_masificacion: medio
+descripcion_corta: 'Una de las plazas principales de la c
+
+  iudad,es el centro geográfico e histórico de Paysandú, y ha sido escenario de t
+
+  res sitios y la definitiva Defensa de Paysandú en 1865.'
+descripcion_larga: "Su historia comienza con la \nplanificación del poblado en 1810\
+  \ por Benito Chain y se consolidó como el epice\nntro de las luchas políticas y\
+  \ militares de la región, incluyendo el juramento \nde la Constitución de 1830.\
+  \ \n \nEl hito más emblemático fue el Monumento a la Libertad, inaugurado en 1860,\
+  \ que\n fue la primera pieza escultórica del país y la segunda estatua de la Libertad\
+  \ \nen América; fue destruido por un proyectil brasileño el 6 de diciembre de 1864.\n\
+  \  En su lugar y alrededor del espacio, se erige actualmente el Mausoleo del Gen\n\
+  eral Leandro Gómez, héroe de la defensa de 1865, cuya estatua domina el centro \n\
+  de la plaza. \n \nTras una profunda remodelación inaugurada el 22 de diciembre de\
+  \ 2024, la plaza \nse revitalizó con una inversión de dos millones de dólares, destacando\
+  \ una fuen\nte central con forma de flor de mburucuyá (símbolo de la ciudad) y la\
+  \ creación \ndel Centro de Interpretación de la Defensa, un espacio museográfico\
+  \ dedicado a \npreservar la memoria histórica de los sitios sufridos por la ciudad."
+direccion: 18 de Julio y Montecaseros, Paysandú.
+lat: -32.31696341123495
+lon: -58.080317953524535
+accesible: true
+gratuito: true
+motivos_singularidad:
+- se realizó la defensa de Paysandú en 1865
+- contiene la estatua a leandro gomez
+- contiene una fuente luminosa
+- contiene el mueseo a leandro gomez.
+etiquetas:
+- historia
+- patrimonio
+- arquitectura
+- plaza.
+curiosidades:
+- funciona el museo de leandro gomez
+- modernizada en el 2024 por el arq. federico percibal.
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

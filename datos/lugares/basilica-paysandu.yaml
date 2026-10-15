@@ -1,0 +1,24 @@
+id: basilica-paysandu
+nombre: Basílica Nuestra Señora del Rosario y San Benito de Palermo
+categoria: religioso
+descripcion_corta: Templo principal de Paysandú, monumento histórico nacional.
+singularidad: 3
+motivos_singularidad:
+- valor arquitectónico
+- patrimonio histórico
+nivel_masificacion: medio
+accesible: true
+gratuito: true
+lat: -32.317088269476805
+lon: -58.079850264899434
+direccion: Montecaseros y 18 de julio
+etiquetas:
+- iglesia
+- patrimonio
+- arquitectura
+transporte_recomendado: a pie
+cerca_de:
+- rincon-leandro-gomez
+fuente: Wikipedia
+curiosidades: []
+fotos: []

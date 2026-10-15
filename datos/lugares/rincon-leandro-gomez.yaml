@@ -1,0 +1,41 @@
+id: rincon-leandro-gomez
+nombre: Rincón de Leandro Gómez
+categoria: historico
+descripcion_corta: Sitio donde fue fusilado el general Leandro Gómez tras la Defensa de Paysandú.
+descripcion_larga: >
+  Ubicado en el centro de Paysandú, este rincón conmemora uno de los episodios
+  más trágicos y emblemáticos de la historia uruguaya. Leandro Gómez, defensor
+  de la ciudad durante el sitio de 1864-1865, fue ejecutado aquí tras la caída
+  de Paysandú.
+historia: >
+  Durante la Guerra del Uruguay, Paysandú resistió un sitio de 33 días contra
+  las fuerzas de Venancio Flores y el Imperio del Brasil. La caída de la ciudad
+  marcó un punto de inflexión en la historia regional.
+singularidad: 4
+motivos_singularidad:
+  - valor histórico
+  - poco conocido
+  - sitio de memoria
+nivel_masificacion: bajo
+accesible: true
+gratuito: true
+lat: -32.3214
+lon: -58.0756
+direccion: Centro, Paysandú
+curiosidades:
+  - Es uno de los pocos sitios de memoria de la Defensa de Paysandú señalizados en la ciudad.
+  - Cerca hay placas recordatorias colocadas por distintas instituciones.
+etiquetas:
+  - historia
+  - siglo XIX
+  - defensa de paysandu
+  - memoria
+horarios: Acceso libre
+precio: Gratis
+duracion_visita_min: 15
+transporte_recomendado: a pie
+fotos:
+  - fotos/rincon-leandro-gomez-01.jpg
+cerca_de:
+  - basilica-paysandu
+fuente: Investigación propia + Wikipedia

@@ -1,0 +1,23 @@
+nombre: Museo Histórico
+id: museo-historico
+categoria: historico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Museo de la historia de Paysandu, también llamado "Espíritu de
+  Paysandú"
+direccion: calle Zorrilla de San Martín entre Sarandí y Leandro Gómez, Paysandú.
+lat: -32.31864078657961
+lon: -58.082281330487774
+accesible: true
+gratuito: true
+motivos_singularidad:
+- Datos interesantes de la historia de Paysandú
+etiquetas:
+- historico
+- museo
+- patrimonio.
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

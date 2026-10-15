@@ -1,0 +1,23 @@
+nombre: Paseo Costero
+id: paseo-costero
+categoria: otro
+singularidad: 3
+nivel_masificacion: alto
+descripcion_corta: Hermoso paseo por la costa del Rio Uruguay engalanado por vegetación
+  nativa y mobiliario para descanso y entretenimiento.
+direccion: ''
+lat: -32.2121
+lon: -58.3232
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- paseo
+- entretenimiento
+- caminata
+- esparimiento.
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

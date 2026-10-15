@@ -1,0 +1,33 @@
+nombre: Estadio Cerrado Municipal
+id: estadio-cerrado-municipal
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Estacio Cerrado construído a nivel Internacional donde se juega
+  Basquetball de primer nivel y se realizan espectáculos de alto nivel.
+descripcion_larga: 'El Estadio 8 de Junio es un estadio cubierto ubicado en la ciudad
+  de Paysandú. Es conocido como "Estadio Cerrado", en contraposición con el cercano
+  Estadio Artigas, que está del otro lado de la calle (no confundir con el denominado
+  "estadio abierto" que también es de la ciudad). Con una capacidad para 6.500 espectadores
+  es el segundo estadio cubierto de mayor capacidad del Uruguay, por debajo de los
+  15.000 que puede albergar el Antel Arena y por encima de los 5.700 del Palacio Contador
+  Gastón Guelfi.
+
+
+  Fue denominado así en honor a la fecha en que la Asamblea General del Uruguay le
+  otorgó a Paysandú la categoría de ciudad, el 8 de junio de 1863.'
+direccion: Bulevar Artigas esquina 25 de Mayo, Paysandú.
+lat: -32.321844
+lon: -58.070984
+accesible: true
+gratuito: false
+motivos_singularidad:
+- Fue diseñado por el Arq.Pablo Patrone
+- Es un referente deportido de Paysandu.
+etiquetas:
+- deporte
+- arte
+- música
+- eventos.
+transporte_recomendado: auto
+fuente: Investigación propia

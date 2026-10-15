@@ -1,0 +1,23 @@
+nombre: Plaza Artigas
+id: plaza-artigas
+categoria: historico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hermosa plaza donde se encuentra emplazada la escultura en homenaje
+  al héroe de la patria, José Gervasio Artigas.
+direccion: calle 18 de Julio y calle Entre Ríos, Paysandú
+lat: -32.2121
+lon: -58.3232
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- plaza
+- histórico
+- paseo
+- patrimonio.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

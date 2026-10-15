@@ -1,0 +1,22 @@
+nombre: Obelisco
+id: obelisco
+categoria: historico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Este hito está íntimamente ligado a la historia de la ciudad, conocida
+  como la "Ciudad Heroica" por su resistencia durante la Guerra Grande (1864-1865).
+direccion: calle Avda.Salto y calle Entre Ríos, Paysandú.
+lat: -32.2121
+lon: -58.3232
+accesible: false
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- histórico
+- arquitecto
+- monumento.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

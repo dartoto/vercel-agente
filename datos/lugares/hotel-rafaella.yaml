@@ -1,0 +1,23 @@
+nombre: Hotel Rafaella
+id: hotel-rafaella
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hotel ubicado en el centro de Paysandu, con todos los servicios
+  y costo accesible
+direccion: 18 de Julio entre calle Juan Zorrilla de San Martín y calle Luis Alberto
+  de Herrera, Paysandu.
+lat: -32.317081068613
+lon: -58.08197171701803
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- hotel
+- turismo
+- alojamiento.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

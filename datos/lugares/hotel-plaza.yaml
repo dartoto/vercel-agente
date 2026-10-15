@@ -1,0 +1,22 @@
+nombre: Hotel Plaza
+id: hotel-plaza
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hotel de muchos años funcionando en la ciudad. Posee todas las
+  comodidaes necesarias para una agradable estadía.
+direccion: Gral. Leandro Gómez 1211, Paysandu
+lat: -32.31813443682416
+lon: -58.08152839003326
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- hotel
+- alojamiento
+- turismo.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

@@ -1,0 +1,22 @@
+nombre: Gran Hotel Paysandu
+id: gran-hotel-paysandu
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Principal hote de Paysandu ubicado en la intersección de las dos
+  calles principales del centro.
+direccion: 18 de Julio y calle 19 de abril, Paysandu
+lat: -32.316737
+lon: -58.083537
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- hotel
+- alojamiento
+- turismo
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

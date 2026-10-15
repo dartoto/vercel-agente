@@ -1,0 +1,23 @@
+nombre: Anfiteatro del Río Uruguay
+id: anfiteatro-del-rio-uruguay
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: El Anfiteatro del Río Uruguay es un teatro de verano público ubicado
+  en Paysandú, sobre la Avenida de los Iracundos, a pocos metros del río.  Fue inaugurado
+  el 22 de marzo de 1997.
+direccion: Avda.de los Iracundos y calle Exodo, Paysandú.
+lat: -32.29769905990269
+lon: -58.09040027009316
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- arquitectura
+- espectaculos
+- social.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

@@ -1,0 +1,21 @@
+nombre: El Jardin Hotel
+id: el-jardin-hotel
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hotel bien equipado con moderna instalaciones con ambiente familiar.
+direccion: calle Montevideo 1085, paysandu.
+lat: -32.317631
+lon: -58.082909
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- hotel
+- alojamiento
+- turismo.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

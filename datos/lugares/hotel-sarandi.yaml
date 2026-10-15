@@ -1,0 +1,22 @@
+nombre: Hotel Sarandí
+id: hotel-sarandi
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hotel ubicado a dos cuadras de 18 de Julio, con todas las comodides
+  a un costo accesible.
+direccion: Sarandi 931,Paysandu
+lat: -32.31823870487852
+lon: -58.08817047468965
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- hotel
+- alojamiento
+- turismo.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

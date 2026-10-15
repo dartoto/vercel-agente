@@ -1,0 +1,21 @@
+nombre: Hotel Bulevar
+id: hotel-bulevar
+categoria: natural
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hotel ubicado en el bulevar de la ciudad a pocas cuadras del centro.
+direccion: Blvar. General Artigas 960, paysandu
+lat: -32.31815287054389
+lon: -58.07063890352566
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- hotel
+- alojamiento
+- turismo.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

@@ -1,0 +1,22 @@
+nombre: Confitería El Bar
+id: confiteria-el-bar
+categoria: gastronomico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Confitería y bar histórico de la ciudad ubicado en el corazón de
+  Paysandú
+direccion: 18 de Julio y calle Luis Alberto de Herrera, Paysandú
+lat: -32.316972
+lon: -58.083065
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- confiteria
+- bar
+- restaurante
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

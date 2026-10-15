@@ -1,0 +1,23 @@
+nombre: Club de Pescadores
+id: club-de-pescadores
+categoria: otro
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Club histórico que difunde el deporte de Pesca desde el siglo pasado,
+  de una gran importancia en el departamento.
+direccion: Avda. Baldomero Vidal 1581, Paysandú.
+lat: -32.30284493785254
+lon: -58.09258104585458
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- deportes
+- historico
+- social
+- entretenimiento.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

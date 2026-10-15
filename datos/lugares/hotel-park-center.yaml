@@ -1,0 +1,22 @@
+nombre: Hotel Park Center
+id: hotel-park-center
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Hotel en pleno centro de la ciudad con todos los servicios a pocos
+  metros. fue remodelado hace 4 años para ofrecer un moderno equipamiento.
+direccion: Dr.Luis Alberto de Herrero 930, paysandu
+lat: -32.317630891301846
+lon: -58.082908529766776
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- hotel
+- alojamiento
+- turismo.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

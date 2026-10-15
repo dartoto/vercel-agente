@@ -1,0 +1,23 @@
+nombre: Yacht Club Paysandú
+id: yacht-club-paysandu
+categoria: arquitectura
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Club de Yates histórico, con una excelente infraestructura, que
+  tiene como objetivo la difusión de la navegación en el Río Uruguay.
+direccion: calle Avda.Salto y calle Entre Ríos, Paysandú.
+lat: -32.2121
+lon: -58.3232
+accesible: true
+gratuito: false
+motivos_singularidad: []
+etiquetas:
+- deportes
+- social
+- entretenimiento
+- histórico
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

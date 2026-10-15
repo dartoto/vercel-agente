@@ -1,0 +1,23 @@
+nombre: Balneario Municipal
+id: balneario-municipal
+categoria: natural
+singularidad: 4
+nivel_masificacion: medio
+descripcion_corta: Balneario sobre el Rìo Uruguay con hermosas playa y entorno natural
+  con árboles de la zona.
+direccion: Avda. de los Iracundos y calle Exodo, Paysandu.
+lat: -32.296649605204856
+lon: -58.09156922887361
+accesible: false
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- natural
+- balneario
+- playa
+- turismo.
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

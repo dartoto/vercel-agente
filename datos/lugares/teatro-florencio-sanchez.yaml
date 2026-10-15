@@ -1,0 +1,22 @@
+nombre: Teatro Florencio Sánchez
+id: teatro-florencio-sanchez
+categoria: historico
+singularidad: 4
+nivel_masificacion: medio
+descripcion_corta: Es un emblemático teatro de la ciudad de Paysandú.
+direccion: calle 19 de Abril entre 18 de Julio y Leandro Gómez, Paysandú.
+lat: -32.31753462902968
+lon: -58.084008673061966
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- historico
+- arquitectura
+- arte
+- teatro.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

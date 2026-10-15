@@ -1,0 +1,22 @@
+nombre: Puerto de Paysandú
+id: puerto-de-paysandu
+categoria: historico
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Puerto sobre el Río Uruguay desde donde se desarrolló la ciudad.
+direccion: Avda.Brasil y Presidente Viera, Paysandú.
+lat: -32.2121
+lon: -58.3232
+accesible: false
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- histórico
+- industrial
+- puerto
+- navegación.
+curiosidades: []
+transporte_recomendado: mixto
+fuente: Investigación propia
+cerca_de: []
+fotos: []

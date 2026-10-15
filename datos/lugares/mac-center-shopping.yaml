@@ -1,0 +1,27 @@
+nombre: Mac Center Shopping
+id: mac-center-shopping
+categoria: otro
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Shopping de venta de varias categorías de productos, destacándose
+  zapatería y ropa, incluye un supermercado, heladería, restaurante.
+direccion: calle 18 de Julio entre calle 19 de Abril y calle Luis Alberto de Herrera,
+  Paysandu
+lat: -32.317715967258785
+lon: -58.082925060639646
+accesible: true
+gratuito: true
+motivos_singularidad:
+- Presenta un lugar cómodo con todos los servicios
+- supermercado
+- tiendas de diferentes rubros.
+etiquetas:
+- compras
+- paseo
+- entretenimiento
+- familia
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []

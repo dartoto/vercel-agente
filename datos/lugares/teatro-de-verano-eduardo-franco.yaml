@@ -1,0 +1,22 @@
+nombre: Teatro de Verano Eduardo Franco
+id: teatro-de-verano-eduardo-franco
+categoria: cultural
+singularidad: 3
+nivel_masificacion: medio
+descripcion_corta: Teatro abierto donde se realizan variados espectáculos que lleva
+  el nombre del cantante del grupo Los Iracundos embajadores culturales de Paysandu.
+direccion: Avda.Baldomero Vidal y calle Exodo, Paysandú
+lat: -32.29838176969446
+lon: -58.09185890744197
+accesible: true
+gratuito: true
+motivos_singularidad: []
+etiquetas:
+- cultura
+- espectáculos
+- entretenimiento.
+curiosidades: []
+transporte_recomendado: a pie
+fuente: Investigación propia
+cerca_de: []
+fotos: []
