@@ -2,21 +2,32 @@
 
 import os
 import sys
+from pathlib import Path
 from typing import List
 
+# 1. Cargar variables de entorno ANTES de cualquier import del proyecto.
+#    Esto es crítico: db.py evalúa USE_TURSO a nivel de módulo, así que
+#    las variables tienen que estar en os.environ antes de importarlo.
+from dotenv import load_dotenv
+
+RAIZ_PROYECTO = Path(__file__).parent.parent
+load_dotenv(dotenv_path=RAIZ_PROYECTO / ".env")
+
+# 2. Asegurar que la raíz del proyecto esté en sys.path
+sys.path.insert(0, str(RAIZ_PROYECTO))
+
+# 3. Ahora sí, imports de terceros y del proyecto
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-# Agregamos la raíz del proyecto al path para importar los módulos
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from agente import chat, _crear_cliente
 
-from agente import chat, _crear_cliente  # noqa: E402
 
+# ---------- App FastAPI ----------
 
 app = FastAPI(title="Agente Paysandú")
 
-# Permitir CORS para que un frontend externo pueda consumir la API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,6 +35,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# ---------- Modelos de request/response ----------
 
 class Mensaje(BaseModel):
     role: str
@@ -38,24 +51,13 @@ class ChatResponse(BaseModel):
     respuesta: str
 
 
+# ---------- Endpoints ----------
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "servicio": "agente-paysandu"}
 
-@app.get("/api/debug")
-def debug():
-    import os
-    from pathlib import Path
-    url = os.environ.get("TURSO_DATABASE_URL", "")
-    token = os.environ.get("TURSO_AUTH_TOKEN", "")
-    return {
-        "turso_url_presente": bool(url),
-        "turso_url_prefijo": url[:35] if url else "FALTA",
-        "turso_token_presente": bool(token),
-        "turso_token_longitud": len(token) if token else 0,
-        "groq_key_presente": bool(os.environ.get("GROQ_API_KEY")),
-        "env_file_existe": (Path(__file__).parent.parent / ".env").exists(),
-    }
+
 @app.post("/api/chat", response_model=ChatResponse)
 def chat_endpoint(request: ChatRequest):
     try:
@@ -65,10 +67,12 @@ def chat_endpoint(request: ChatRequest):
         return ChatResponse(respuesta=respuesta)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+# ---------- Endpoint de diagnóstico (BORRAR cuando todo funcione) ----------
+
 @app.get("/api/debug")
 def debug():
-    import os
-    from pathlib import Path
     url = os.environ.get("TURSO_DATABASE_URL", "")
     token = os.environ.get("TURSO_AUTH_TOKEN", "")
     return {
@@ -77,5 +81,5 @@ def debug():
         "turso_token_presente": bool(token),
         "turso_token_longitud": len(token) if token else 0,
         "groq_key_presente": bool(os.environ.get("GROQ_API_KEY")),
-        "env_file_existe": (Path(__file__).parent.parent / ".env").exists(),
+        "use_turso_efectivo": bool(url and token),
     }
