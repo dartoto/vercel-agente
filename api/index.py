@@ -42,7 +42,20 @@ class ChatResponse(BaseModel):
 def health():
     return {"status": "ok", "servicio": "agente-paysandu"}
 
-
+@app.get("/api/debug")
+def debug():
+    import os
+    from pathlib import Path
+    url = os.environ.get("TURSO_DATABASE_URL", "")
+    token = os.environ.get("TURSO_AUTH_TOKEN", "")
+    return {
+        "turso_url_presente": bool(url),
+        "turso_url_prefijo": url[:35] if url else "FALTA",
+        "turso_token_presente": bool(token),
+        "turso_token_longitud": len(token) if token else 0,
+        "groq_key_presente": bool(os.environ.get("GROQ_API_KEY")),
+        "env_file_existe": (Path(__file__).parent.parent / ".env").exists(),
+    }
 @app.post("/api/chat", response_model=ChatResponse)
 def chat_endpoint(request: ChatRequest):
     try:
@@ -52,3 +65,17 @@ def chat_endpoint(request: ChatRequest):
         return ChatResponse(respuesta=respuesta)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+@app.get("/api/debug")
+def debug():
+    import os
+    from pathlib import Path
+    url = os.environ.get("TURSO_DATABASE_URL", "")
+    token = os.environ.get("TURSO_AUTH_TOKEN", "")
+    return {
+        "turso_url_presente": bool(url),
+        "turso_url_prefijo": url[:35] if url else "FALTA",
+        "turso_token_presente": bool(token),
+        "turso_token_longitud": len(token) if token else 0,
+        "groq_key_presente": bool(os.environ.get("GROQ_API_KEY")),
+        "env_file_existe": (Path(__file__).parent.parent / ".env").exists(),
+    }
