@@ -1,26 +1,67 @@
-"""Consultas a la base de lugares. Sin dependencias de LLM."""
+"""Consultas a la base de lugares. Compatible con SQLite local y Turso."""
 
 import json
 import math
+import os
 import sqlite3
 import unicodedata
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 DB_PATH = Path(__file__).parent / "paysandu.db"
 
 CAMPOS_JSON = ("curiosidades", "motivos_singularidad", "fotos")
 
+TURSO_URL = os.environ.get("TURSO_DATABASE_URL")
+TURSO_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
+USE_TURSO = bool(TURSO_URL and TURSO_TOKEN)
 
-def _conn() -> sqlite3.Connection:
+# Convertimos libsql:// a https:// para la API HTTP
+if USE_TURSO and TURSO_URL.startswith("libsql://"):
+    TURSO_URL = TURSO_URL.replace("libsql://", "https://", 1)
+
+if USE_TURSO:
+    from libsql_client import create_client_sync
+
+
+# ---------- Conexión ----------
+
+_cliente_turso = None
+
+
+def _get_cliente_turso():
+    global _cliente_turso
+    if _cliente_turso is None:
+        _cliente_turso = create_client_sync(
+            url=TURSO_URL,
+            auth_token=TURSO_TOKEN,
+        )
+    return _cliente_turso
+
+
+def _query(sql: str, params: list | tuple = ()) -> list[dict]:
+    if USE_TURSO:
+        cliente = _get_cliente_turso()
+        result = cliente.execute(sql, list(params))
+        columnas = list(result.columns)
+        return [dict(zip(columnas, row)) for row in result.rows]
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        rows = conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
 
+
+# ---------- Utilidades ----------
 
 def _sin_acentos(texto: str) -> str:
-    """Normaliza texto: sin acentos, minúsculas. Para búsquedas tolerantes."""
     if not texto:
         return ""
     t = unicodedata.normalize("NFKD", texto)
@@ -28,8 +69,7 @@ def _sin_acentos(texto: str) -> str:
     return t.lower().strip()
 
 
-def _decode(row: sqlite3.Row) -> dict:
-    d = dict(row)
+def _decode(d: dict) -> dict:
     for campo in CAMPOS_JSON:
         if campo in d and isinstance(d[campo], str):
             d[campo] = json.loads(d[campo])
@@ -59,7 +99,6 @@ def buscar_lugares(
     solo_accesibles: bool = False,
     limite: int = 10,
 ) -> list[dict]:
-    """Búsqueda flexible con filtros combinables."""
     sql = ["SELECT DISTINCT l.* FROM lugares l"]
     params: list = []
 
@@ -88,31 +127,21 @@ def buscar_lugares(
     sql.append("ORDER BY l.singularidad DESC, l.nombre ASC LIMIT ?")
     params.append(limite)
 
-    with _conn() as conn:
-        rows = conn.execute(" ".join(sql), params).fetchall()
+    rows = _query(" ".join(sql), params)
     return [_decode(r) for r in rows]
 
 
 def buscar_por_nombre(texto: str, limite: int = 5) -> list[dict]:
-    """
-    Búsqueda parcial por nombre, tolerante a acentos y mayúsculas.
-    Trae todos los lugares y filtra en Python para poder normalizar.
-    """
     objetivo = _sin_acentos(texto)
     if not objetivo:
         return []
 
-    with _conn() as conn:
-        rows = conn.execute(
-            "SELECT * FROM lugares ORDER BY singularidad DESC, nombre ASC"
-        ).fetchall()
+    rows = _query("SELECT * FROM lugares ORDER BY singularidad DESC, nombre ASC")
 
     coincidencias = []
-    for r in rows:
-        lugar = _decode(r)
-        nombre_norm = _sin_acentos(lugar["nombre"])
-        id_norm = _sin_acentos(lugar["id"])
-        if objetivo in nombre_norm or objetivo in id_norm:
+    for lugar in rows:
+        lugar = _decode(lugar)
+        if objetivo in _sin_acentos(lugar["nombre"]) or objetivo in _sin_acentos(lugar["id"]):
             coincidencias.append(lugar)
         if len(coincidencias) >= limite:
             break
@@ -126,10 +155,6 @@ def buscar_con_coordenadas(
     min_singularidad: int = 1,
     limite: int = 50,
 ) -> list[dict]:
-    """
-    Igual que buscar_lugares, pero solo devuelve lugares con lat/lon.
-    Usado por armar_recorrido.
-    """
     sql = ["SELECT DISTINCT l.* FROM lugares l"]
     params: list = []
 
@@ -154,43 +179,34 @@ def buscar_con_coordenadas(
     sql.append("ORDER BY l.singularidad DESC LIMIT ?")
     params.append(limite)
 
-    with _conn() as conn:
-        rows = conn.execute(" ".join(sql), params).fetchall()
+    rows = _query(" ".join(sql), params)
     return [_decode(r) for r in rows]
 
 
 def obtener_ficha(lugar_id: str) -> Optional[dict]:
-    """Ficha completa de un lugar, incluidas etiquetas y relacionados."""
-    with _conn() as conn:
-        row = conn.execute(
-            "SELECT * FROM lugares WHERE id = ?", (lugar_id,)
-        ).fetchone()
-        if row is None:
-            return None
+    rows = _query("SELECT * FROM lugares WHERE id = ?", [lugar_id])
+    if not rows:
+        return None
 
-        lugar = _decode(row)
+    lugar = _decode(rows[0])
 
-        lugar["etiquetas"] = [
-            r["etiqueta"]
-            for r in conn.execute(
-                "SELECT etiqueta FROM etiquetas WHERE lugar_id = ? ORDER BY etiqueta",
-                (lugar_id,),
-            ).fetchall()
-        ]
+    etiquetas = _query(
+        "SELECT etiqueta FROM etiquetas WHERE lugar_id = ? ORDER BY etiqueta",
+        [lugar_id],
+    )
+    lugar["etiquetas"] = [r["etiqueta"] for r in etiquetas]
 
-        lugar["cerca_de"] = [
-            {"id": r["cerca_de_id"], "nombre": r["nombre"]}
-            for r in conn.execute(
-                """
-                SELECT c.cerca_de_id, l.nombre
-                FROM cerca_de c
-                JOIN lugares l ON l.id = c.cerca_de_id
-                WHERE c.lugar_id = ?
-                ORDER BY l.singularidad DESC
-                """,
-                (lugar_id,),
-            ).fetchall()
-        ]
+    relacionados = _query(
+        """
+        SELECT c.cerca_de_id, l.nombre
+        FROM cerca_de c
+        JOIN lugares l ON l.id = c.cerca_de_id
+        WHERE c.lugar_id = ?
+        ORDER BY l.singularidad DESC
+        """,
+        [lugar_id],
+    )
+    lugar["cerca_de"] = [{"id": r["cerca_de_id"], "nombre": r["nombre"]} for r in relacionados]
 
     return lugar
 
@@ -201,21 +217,19 @@ def buscar_cerca(
     radio_km: float = 1.0,
     limite: int = 10,
 ) -> list[dict]:
-    """Lugares dentro de un radio (km) de una coordenada."""
     dlat = radio_km / 111.0
     dlon = radio_km / (111.0 * math.cos(math.radians(lat)))
 
-    with _conn() as conn:
-        rows = conn.execute(
-            """
-            SELECT * FROM lugares
-            WHERE lat IS NOT NULL
-              AND lon IS NOT NULL
-              AND lat BETWEEN ? AND ?
-              AND lon BETWEEN ? AND ?
-            """,
-            (lat - dlat, lat + dlat, lon - dlon, lon + dlon),
-        ).fetchall()
+    rows = _query(
+        """
+        SELECT * FROM lugares
+        WHERE lat IS NOT NULL
+          AND lon IS NOT NULL
+          AND lat BETWEEN ? AND ?
+          AND lon BETWEEN ? AND ?
+        """,
+        [lat - dlat, lat + dlat, lon - dlon, lon + dlon],
+    )
 
     lugares = []
     for r in rows:
@@ -231,47 +245,39 @@ def buscar_cerca(
 
 
 def lugares_relacionados(lugar_id: str) -> list[dict]:
-    """Lugares conectados vía 'cerca_de' (en ambos sentidos)."""
-    with _conn() as conn:
-        rows = conn.execute(
-            """
-            SELECT DISTINCT l.*
-            FROM lugares l
-            WHERE l.id IN (
-                SELECT cerca_de_id FROM cerca_de WHERE lugar_id = ?
-                UNION
-                SELECT lugar_id FROM cerca_de WHERE cerca_de_id = ?
-            )
-            ORDER BY l.singularidad DESC, l.nombre ASC
-            """,
-            (lugar_id, lugar_id),
-        ).fetchall()
+    rows = _query(
+        """
+        SELECT DISTINCT l.*
+        FROM lugares l
+        WHERE l.id IN (
+            SELECT cerca_de_id FROM cerca_de WHERE lugar_id = ?
+            UNION
+            SELECT lugar_id FROM cerca_de WHERE lugar_id = ?
+        )
+        ORDER BY l.singularidad DESC, l.nombre ASC
+        """,
+        [lugar_id, lugar_id],
+    )
     return [_decode(r) for r in rows]
 
 
 def listar_etiquetas() -> list[dict]:
-    """Etiquetas disponibles con su frecuencia."""
-    with _conn() as conn:
-        rows = conn.execute(
-            """
-            SELECT etiqueta, COUNT(*) AS usos
-            FROM etiquetas
-            GROUP BY etiqueta
-            ORDER BY usos DESC, etiqueta ASC
-            """
-        ).fetchall()
-    return [dict(r) for r in rows]
+    return _query(
+        """
+        SELECT etiqueta, COUNT(*) AS usos
+        FROM etiquetas
+        GROUP BY etiqueta
+        ORDER BY usos DESC, etiqueta ASC
+        """
+    )
 
 
 def listar_categorias() -> list[dict]:
-    """Categorías disponibles con su frecuencia."""
-    with _conn() as conn:
-        rows = conn.execute(
-            """
-            SELECT categoria, COUNT(*) AS usos
-            FROM lugares
-            GROUP BY categoria
-            ORDER BY usos DESC, categoria ASC
-            """
-        ).fetchall()
-    return [dict(r) for r in rows]
+    return _query(
+        """
+        SELECT categoria, COUNT(*) AS usos
+        FROM lugares
+        GROUP BY categoria
+        ORDER BY usos DESC, categoria ASC
+        """
+    )
