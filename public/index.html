@@ -1,76 +1,84 @@
 <script>
-    const API_URL = '/api/chat';
-    const messagesContainer = document.getElementById('messages');
-    const userInput = document.getElementById('user-input');
-    const sendBtn = document.getElementById('send-btn');
-    const loadingIndicator = document.getElementById('loading-indicator');
+    document.addEventListener('DOMContentLoaded', () => {
+        const API_URL = '/api/chat';
+        const messagesContainer = document.getElementById('messages');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const loadingIndicator = document.getElementById('loading-indicator');
 
-    let conversationHistory = [];
-
-    function renderMarkdown(text) {
-        // 1. Convertir imágenes markdown ![alt](url) a <img>
-        let html = text.replace(
-            /!\[([^\]]*)\]\(([^)]+)\)/g,
-            '<br><img src="$2" alt="$1" ' +
-            'style="max-width:100%; border-radius:8px; ' +
-            'margin-top:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><br>'
-        );
-        // 2. Convertir **negrita** a <strong>
-        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-        // 3. Convertir saltos de línea a <br>
-        html = html.replace(/\n/g, '<br>');
-        return html;
-    }
-
-    function addMessage(role, text) {
-        const div = document.createElement('div');
-        div.classList.add('message', role);
-        const etiqueta = role === 'user' ? 'Vos' : 'Agente';
-        div.innerHTML = `<strong>${etiqueta}:</strong> ${renderMarkdown(text)}`;
-        messagesContainer.appendChild(div);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }
-
-    async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text) return;
-
-        addMessage('user', text);
-        conversationHistory.push({ role: 'user', content: text });
-        userInput.value = '';
-        sendBtn.disabled = true;
-        loadingIndicator.style.display = 'block';
-
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ mensajes: conversationHistory })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Error en el servidor');
-            }
-
-            const data = await response.json();
-            const botReply = data.respuesta;
-
-            addMessage('bot', botReply);
-            conversationHistory.push({ role: 'assistant', content: botReply });
-
-        } catch (error) {
-            console.error('Error:', error);
-            addMessage('bot', `Lo siento, hubo un error: ${error.message}`);
-        } finally {
-            sendBtn.disabled = false;
-            loadingIndicator.style.display = 'none';
-            userInput.focus();
+        // Verificación de seguridad: si algún elemento no existe, mostrar error en consola
+        if (!messagesContainer || !userInput || !sendBtn || !loadingIndicator) {
+            console.error('Error: No se encontraron todos los elementos del DOM necesarios.');
+            return; // Detener la ejecución si falta algo
         }
-    }
 
-    sendBtn.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+        let conversationHistory = [];
+
+        function renderMarkdown(text) {
+            // 1. Convertir imágenes markdown ![alt](url) a <img>
+            let html = text.replace(
+                /!\[([^\]]*)\]\(([^)]+)\)/g,
+                '<br><img src="$2" alt="$1" ' +
+                'style="max-width:100%; border-radius:8px; ' +
+                'margin-top:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);"><br>'
+            );
+            // 2. Convertir **negrita** a <strong>
+            html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            // 3. Convertir saltos de línea a <br>
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.classList.add('message', role);
+            const etiqueta = role === 'user' ? 'Vos' : 'Agente';
+            div.innerHTML = `<strong>${etiqueta}:</strong> ${renderMarkdown(text)}`;
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            addMessage('user', text);
+            conversationHistory.push({ role: 'user', content: text });
+            userInput.value = '';
+            sendBtn.disabled = true;
+            loadingIndicator.style.display = 'block';
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mensajes: conversationHistory })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Error en el servidor');
+                }
+
+                const data = await response.json();
+                const botReply = data.respuesta;
+
+                addMessage('bot', botReply);
+                conversationHistory.push({ role: 'assistant', content: botReply });
+
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('bot', `Lo siento, hubo un error: ${error.message}`);
+            } finally {
+                sendBtn.disabled = false;
+                loadingIndicator.style.display = 'none';
+                userInput.focus();
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     });
 </script>
