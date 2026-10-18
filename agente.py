@@ -4,11 +4,12 @@ import json
 import os
 import re
 import sys
-from dotenv import load_dotenv
 from pathlib import Path
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 from herramientas import ESQUEMAS, ejecutar
 from prompt import SYSTEM_PROMPT
@@ -21,8 +22,6 @@ MAX_PASOS = 6
 TEMPERATURA = 0.3
 LOG_TOOL_CALLS = os.environ.get("LOG_TOOL_CALLS", "1") == "1"
 
-# Palabras que sugieren que el usuario pide datos concretos.
-# Si aparecen y el modelo no llamó herramientas, forzamos tool_choice.
 PALABRAS_QUE_REQUIEREN_TOOLS = (
     "busca", "buscá", "buscame", "búscame", "encontra", "encontrá",
     "recomenda", "recomendá", "recomendame", "sugeri", "sugerí",
@@ -34,22 +33,16 @@ PALABRAS_QUE_REQUIEREN_TOOLS = (
 
 
 def _crear_cliente() -> OpenAI:
-    """Cliente apuntando a Groq."""
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise RuntimeError(
             "Falta la variable de entorno GROQ_API_KEY. "
-            "Configurala en el archivo .env o en Vercel (Settings → Environment Variables)."
+            "Configurala en el archivo .env o en Vercel."
         )
-    return OpenAI(
-        base_url=GROQ_BASE_URL,
-        api_key=api_key,
-        timeout=60.0,
-    )
+    return OpenAI(base_url=GROQ_BASE_URL, api_key=api_key, timeout=60.0)
 
 
 def _normalizar_argumentos(args) -> str:
-    """Acepta argumentos como dict o string y devuelve string JSON."""
     if isinstance(args, dict):
         return json.dumps(args, ensure_ascii=False)
     if isinstance(args, str):
@@ -58,7 +51,6 @@ def _normalizar_argumentos(args) -> str:
 
 
 def _log_tool_call(nombre: str, argumentos: dict, resultado: dict) -> None:
-    """Imprime en stderr un resumen de cada tool call, para depurar."""
     if not LOG_TOOL_CALLS:
         return
     ok = "✓" if resultado.get("ok") else "✗"
@@ -71,57 +63,48 @@ def _log_tool_call(nombre: str, argumentos: dict, resultado: dict) -> None:
     print(msg, file=sys.stderr)
 
 
-def _ejecutar_tool(nombre: str, argumentos_json: str) -> str:
-    """Ejecuta una herramienta y devuelve JSON string para el LLM."""
+def _ejecutar_tool(nombre: str, argumentos_json: str) -> tuple[str, dict]:
+    """
+    Ejecuta una herramienta y devuelve (json_string, resultado_dict).
+    El primer valor va al LLM; el segundo se usa para acumular lugares.
+    """
     try:
         args = json.loads(argumentos_json) if argumentos_json else {}
     except json.JSONDecodeError as e:
-        return json.dumps({"ok": False, "error": f"JSON inválido: {e}"})
+        return json.dumps({"ok": False, "error": f"JSON inválido: {e}"}), {}
 
     resultado = ejecutar(nombre, args)
     _log_tool_call(nombre, args, resultado)
-    return json.dumps(resultado, ensure_ascii=False)
+    return json.dumps(resultado, ensure_ascii=False), resultado
 
 
 def _parece_pedir_datos(texto: str) -> bool:
-    """Heurística: ¿el mensaje del usuario parece requerir consultar la base?"""
     t = texto.lower()
     return any(p in t for p in PALABRAS_QUE_REQUIEREN_TOOLS)
 
 
 def _extraer_tool_calls(msg) -> list[dict]:
-    """Convierte los tool_calls nativos del mensaje a formato uniforme."""
     if not msg.tool_calls:
         return []
-    resultado = []
-    for i, tc in enumerate(msg.tool_calls):
-        resultado.append({
+    return [
+        {
             "id": tc.id or f"call_{i}",
             "name": tc.function.name,
             "arguments": _normalizar_argumentos(tc.function.arguments),
-        })
-    return resultado
+        }
+        for i, tc in enumerate(msg.tool_calls)
+    ]
 
 
 def _parsear_tool_call_textual(contenido: str) -> dict | None:
-    """
-    Detecta si el modelo escribió un tool call como texto JSON en vez de
-    emitirlo como tool_call nativa. Devuelve {"name": ..., "arguments": ...}
-    o None si no parece un tool call.
-    """
     if not contenido:
         return None
-
     texto = contenido.strip()
-
-    # Limpiar posibles bloques markdown ```json ... ```
     texto = re.sub(r"^```(?:json)?\s*", "", texto)
     texto = re.sub(r"\s*```$", "", texto)
-
     try:
         data = json.loads(texto)
     except json.JSONDecodeError:
-        # Intentar extraer el JSON embebido
         match = re.search(r'\{\s*"name"\s*:.+\}', texto, re.DOTALL)
         if not match:
             return None
@@ -129,29 +112,62 @@ def _parsear_tool_call_textual(contenido: str) -> dict | None:
             data = json.loads(match.group(0))
         except json.JSONDecodeError:
             return None
-
     if not isinstance(data, dict) or "name" not in data:
         return None
-
-    # Normalizar arguments / parameters
     args = data.get("arguments") or data.get("parameters") or {}
     if isinstance(args, str):
         try:
             args = json.loads(args)
         except json.JSONDecodeError:
             args = {}
-
     return {"name": data["name"], "arguments": args}
 
 
-def chat(mensajes: list[dict], cliente: OpenAI | None = None) -> str:
+def _acumular_lugares(resultado: dict, acumulador: list[dict]) -> None:
+    """
+    Extrae lugares de un resultado de herramienta y los agrega al acumulador.
+    Soporta los formatos:
+      - {"lugares": [...]}       (buscar_lugares, buscar_por_nombre, buscar_cerca)
+      - {"lugar": {...}}         (obtener_ficha)
+    """
+    if not resultado.get("ok"):
+        return
+    if isinstance(resultado.get("lugares"), list):
+        acumulador.extend(resultado["lugares"])
+    elif isinstance(resultado.get("lugar"), dict):
+        acumulador.append(resultado["lugar"])
+
+
+def _deduplicar_lugares(lugares: list[dict]) -> list[dict]:
+    """Quita duplicados por id, manteniendo el orden de aparición."""
+    vistos = set()
+    unicos = []
+    for lugar in lugares:
+        lid = lugar.get("id")
+        if lid and lid not in vistos:
+            vistos.add(lid)
+            unicos.append(lugar)
+    return unicos
+
+
+def chat(
+    mensajes: list[dict],
+    cliente: OpenAI | None = None,
+    devolver_lugares: bool = False,
+):
     """
     Procesa la conversación y devuelve la respuesta final del agente.
-    `mensajes` se modifica in-place, así conserva el historial entre turnos.
+
+    Si `devolver_lugares=True`, devuelve un dict:
+        {"respuesta": str, "lugares": [ {...}, ... ]}
+    Si no, devuelve solo el string de la respuesta (comportamiento clásico).
+
+    `mensajes` se modifica in-place para conservar el historial entre turnos.
     """
     cliente = cliente or _crear_cliente()
 
-    # ¿El último mensaje del usuario parece pedir datos concretos?
+    lugares_encontrados: list[dict] = []
+
     ultimo_usuario = next(
         (m["content"] for m in reversed(mensajes) if m["role"] == "user"),
         "",
@@ -173,17 +189,17 @@ def chat(mensajes: list[dict], cliente: OpenAI | None = None) -> str:
             )
         except Exception as e:
             print(f"\n⚠️  Error al llamar a Groq: {type(e).__name__}: {e}", file=sys.stderr)
-            return (
-                "Tuve un problema al conectar con el modelo. "
-                "Verificá tu API key y tu conexión a internet."
-            )
+            msg_error = "Tuve un problema al conectar con el modelo. Verificá tu API key y tu conexión."
+            if devolver_lugares:
+                return {"respuesta": msg_error, "lugares": []}
+            return msg_error
 
         msg = respuesta.choices[0].message
 
-        # --- Caso 1: tool calls nativas ---
+        # --- Tool calls nativas ---
         tool_calls = _extraer_tool_calls(msg)
 
-        # --- Caso 2: tool call escrita como texto en content ---
+        # --- Tool call escrita como texto ---
         if not tool_calls and msg.content:
             parseada = _parsear_tool_call_textual(msg.content)
             if parseada:
@@ -197,19 +213,18 @@ def chat(mensajes: list[dict], cliente: OpenAI | None = None) -> str:
                     "arguments": json.dumps(parseada["arguments"], ensure_ascii=False),
                 }]
 
-        # --- Caso 3: respuesta final sin herramientas ---
+        # --- Respuesta final sin herramientas ---
         if not tool_calls:
             contenido = msg.content or ""
-            if paso == 0 and forzar_tools_primera_vez and contenido:
-                print(
-                    "  ⚠️  El modelo respondió sin consultar la base. "
-                    "Puede contener datos no verificados.",
-                    file=sys.stderr,
-                )
             mensajes.append({"role": "assistant", "content": contenido})
+            if devolver_lugares:
+                return {
+                    "respuesta": contenido,
+                    "lugares": _deduplicar_lugares(lugares_encontrados),
+                }
             return contenido
 
-        # Ejecutar las herramientas (nativas o parseadas)
+        # --- Ejecutar herramientas ---
         mensajes.append({
             "role": "assistant",
             "content": msg.content or "",
@@ -217,24 +232,21 @@ def chat(mensajes: list[dict], cliente: OpenAI | None = None) -> str:
                 {
                     "id": tc["id"],
                     "type": "function",
-                    "function": {
-                        "name": tc["name"],
-                        "arguments": tc["arguments"],
-                    },
+                    "function": {"name": tc["name"], "arguments": tc["arguments"]},
                 }
                 for tc in tool_calls
             ],
         })
 
         for tc in tool_calls:
-            resultado_json = _ejecutar_tool(tc["name"], tc["arguments"])
+            resultado_json, resultado_dict = _ejecutar_tool(tc["name"], tc["arguments"])
+            _acumular_lugares(resultado_dict, lugares_encontrados)
             mensajes.append({
                 "role": "tool",
                 "tool_call_id": tc["id"],
                 "content": resultado_json,
             })
 
-        # Después del primer paso, dejamos que el modelo decida libremente
         forzar_tools_primera_vez = False
 
         if paso == MAX_PASOS - 1:
@@ -243,7 +255,10 @@ def chat(mensajes: list[dict], cliente: OpenAI | None = None) -> str:
                 file=sys.stderr,
             )
 
-    return "No pude completar la consulta en los pasos previstos."
+    msg_max = "No pude completar la consulta en los pasos previstos."
+    if devolver_lugares:
+        return {"respuesta": msg_max, "lugares": _deduplicar_lugares(lugares_encontrados)}
+    return msg_max
 
 
 def main():

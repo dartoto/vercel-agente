@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Lugares - Paysandú</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -25,6 +29,7 @@
             display: flex;
             flex-direction: column;
             height: 70vh;
+            margin-bottom: 20px;
         }
         #messages {
             flex: 1;
@@ -50,7 +55,7 @@
             color: #2c3e50;
         }
 
-        /* Fotos dentro del chat: miniatura clickeable */
+        /* Fotos en el chat */
         .foto-chat {
             display: block;
             max-width: 320px;
@@ -67,7 +72,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
 
-        /* Lightbox (pantalla completa) */
+        /* Lightbox */
         #lightbox {
             display: none;
             position: fixed;
@@ -136,6 +141,15 @@
             font-size: 0.9em;
             margin-top: 10px;
         }
+
+        /* Mapa */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 0;
+        }
     </style>
 </head>
 <body>
@@ -156,14 +170,21 @@
         <div id="loading-indicator">El agente está pensando...</div>
     </div>
 
+    <!-- Mapa debajo del chat -->
+    <div id="map"></div>
+
     <!-- Lightbox para ampliar fotos -->
     <div id="lightbox">
         <span class="cerrar">&times;</span>
         <img src="" alt="Foto ampliada">
     </div>
 
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Referencias al DOM ---
             const API_URL = '/api/chat';
             const messagesContainer = document.getElementById('messages');
             const userInput = document.getElementById('user-input');
@@ -177,23 +198,47 @@
                 return;
             }
 
-            let conversationHistory = [];
+            // --- Mapa con Leaflet ---
+            const map = L.map('map').setView([-32.317, -58.080], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 19,
+            }).addTo(map);
 
-            // --- Lightbox: abrir al hacer clic en una foto del chat ---
+            const markersLayer = L.layerGroup().addTo(map);
+
+            function actualizarMapa(lugares) {
+                markersLayer.clearLayers();
+                if (!lugares || lugares.length === 0) return;
+
+                const bounds = [];
+                lugares.forEach(lugar => {
+                    if (lugar.lat == null || lugar.lon == null) return;
+                    L.marker([lugar.lat, lugar.lon])
+                        .bindPopup(
+                            `<strong>${lugar.nombre || ''}</strong><br>` +
+                            `${lugar.descripcion_corta || ''}`
+                        )
+                        .addTo(markersLayer);
+                    bounds.push([lugar.lat, lugar.lon]);
+                });
+
+                if (bounds.length > 0) {
+                    map.fitBounds(bounds, { padding: [30, 30] });
+                }
+            }
+
+            // --- Lightbox para fotos ---
             messagesContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('foto-chat')) {
                     lightboxImg.src = e.target.src;
                     lightbox.classList.add('abierto');
                 }
             });
-
-            // --- Lightbox: cerrar al hacer clic en el fondo o en la X ---
             lightbox.addEventListener('click', () => {
                 lightbox.classList.remove('abierto');
                 lightboxImg.src = '';
             });
-
-            // Cerrar con Escape
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && lightbox.classList.contains('abierto')) {
                     lightbox.classList.remove('abierto');
@@ -201,15 +246,13 @@
                 }
             });
 
+            // --- Render de markdown básico (imágenes, negrita, saltos) ---
             function renderMarkdown(text) {
-                // Imágenes markdown ![alt](url) → <img class="foto-chat">
                 let html = text.replace(
                     /!\[([^\]]*)\]\(([^)]+)\)/g,
                     '<img src="$2" alt="$1" class="foto-chat">'
                 );
-                // Negrita **texto** → <strong>
                 html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-                // Saltos de línea → <br>
                 html = html.replace(/\n/g, '<br>');
                 return html;
             }
@@ -222,6 +265,9 @@
                 messagesContainer.appendChild(div);
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
+
+            // --- Historial y envío de mensajes ---
+            let conversationHistory = [];
 
             async function sendMessage() {
                 const text = userInput.value.trim();
@@ -246,10 +292,14 @@
                     }
 
                     const data = await response.json();
-                    const botReply = data.respuesta;
+                    addMessage('bot', data.respuesta);
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: data.respuesta
+                    });
 
-                    addMessage('bot', botReply);
-                    conversationHistory.push({ role: 'assistant', content: botReply });
+                    // Actualizar el mapa con los lugares que devolvió el backend
+                    actualizarMapa(data.lugares || []);
                 } catch (error) {
                     console.error('Error:', error);
                     addMessage('bot', `Lo siento, hubo un error: ${error.message}`);
