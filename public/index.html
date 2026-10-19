@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agente de Lugares - Paysandú</title>
 
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
@@ -16,11 +15,82 @@
             padding: 20px;
             background: #f4f4f9;
         }
-        h1 {
-            color: #333;
-            text-align: center;
+        h1 { color: #333; text-align: center; margin-bottom: 20px; }
+
+        /* Tarjeta de bienvenida del QR */
+        #card-lugar {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
             margin-bottom: 20px;
         }
+        #card-lugar.visible { display: block; }
+        #card-lugar .cabecera {
+            position: relative;
+        }
+        #card-lugar img.portada {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            display: block;
+            background: #eee;
+        }
+        #card-lugar .sin-foto {
+            width: 100%;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            font-size: 48px;
+        }
+        #card-lugar .cuerpo { padding: 20px; }
+        #card-lugar h2 {
+            margin: 0 0 8px 0;
+            color: #2c3e50;
+            font-size: 22px;
+        }
+        #card-lugar .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        #card-lugar .badge {
+            background: #e8f1fb;
+            color: #007bff;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        #card-lugar .badge.gratis { background: #e6f7e6; color: #2e7d32; }
+        #card-lugar .badge.singular { background: #fff3e0; color: #e65100; }
+        #card-lugar p.descripcion {
+            color: #444;
+            line-height: 1.6;
+            margin: 12px 0;
+        }
+        #card-lugar .direccion {
+            color: #666;
+            font-size: 14px;
+            margin: 8px 0 16px 0;
+        }
+        #card-lugar .boton-agente {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        #card-lugar .boton-agente:hover { background: #0056b3; }
+
         #chat-container {
             background: white;
             border-radius: 12px;
@@ -32,120 +102,48 @@
             margin-bottom: 20px;
         }
         #messages {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1; overflow-y: auto;
             border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding-bottom: 15px; margin-bottom: 15px;
         }
-        .message {
-            margin-bottom: 15px;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-        .user {
-            text-align: right;
-            color: #007bff;
-        }
-        .bot {
-            text-align: left;
-            color: #333;
-        }
-        .message strong {
-            color: #2c3e50;
-        }
-
-        /* Fotos en el chat */
+        .message { margin-bottom: 15px; line-height: 1.5; word-wrap: break-word; }
+        .user { text-align: right; color: #007bff; }
+        .bot { text-align: left; color: #333; }
+        .message strong { color: #2c3e50; }
         .foto-chat {
-            display: block;
-            max-width: 320px;
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 8px;
+            display: block; max-width: 320px; width: 100%;
+            border-radius: 8px; margin-top: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             cursor: zoom-in;
-            transition: transform 0.15s, box-shadow 0.15s;
         }
-        .foto-chat:hover {
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-        }
-
-        /* Lightbox */
         #lightbox {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            cursor: zoom-out;
-            padding: 20px;
+            display: none; position: fixed; inset: 0;
+            background: rgba(0, 0, 0, 0.85); z-index: 1000;
+            align-items: center; justify-content: center;
+            cursor: zoom-out; padding: 20px;
         }
-        #lightbox.abierto {
-            display: flex;
-        }
+        #lightbox.abierto { display: flex; }
         #lightbox img {
-            max-width: 95vw;
-            max-height: 95vh;
+            max-width: 95vw; max-height: 95vh;
             border-radius: 8px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
         }
-        #lightbox .cerrar {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-            line-height: 1;
-        }
-
-        #input-area {
-            display: flex;
-            gap: 10px;
-        }
+        #input-area { display: flex; gap: 10px; }
         #user-input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
+            flex: 1; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 16px;
         }
         #send-btn {
-            padding: 12px 24px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
+            padding: 12px 24px; background: #007bff; color: white;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-size: 16px; font-weight: 600;
         }
-        #send-btn:hover {
-            background: #0056b3;
-        }
-        #send-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+        #send-btn:disabled { background: #ccc; cursor: not-allowed; }
         #loading-indicator {
-            display: none;
-            color: #888;
-            font-style: italic;
-            font-size: 0.9em;
-            margin-top: 10px;
+            display: none; color: #888; font-style: italic;
+            font-size: 0.9em; margin-top: 10px;
         }
-
-        /* Mapa */
         #map {
-            height: 400px;
-            width: 100%;
+            height: 400px; width: 100%;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             z-index: 0;
@@ -155,37 +153,45 @@
 <body>
     <h1>🤖 Agente de Lugares - Paysandú</h1>
 
+    <!-- Tarjeta que aparece al escanear un QR -->
+    <div id="card-lugar">
+        <div class="cabecera" id="card-cabecera"></div>
+        <div class="cuerpo">
+            <h2 id="card-nombre"></h2>
+            <div class="badges" id="card-badges"></div>
+            <p class="descripcion" id="card-descripcion"></p>
+            <p class="direccion" id="card-direccion"></p>
+            <button class="boton-agente" id="btn-preguntar">
+                💬 Preguntale al agente
+            </button>
+        </div>
+    </div>
+
     <div id="chat-container">
         <div id="messages">
             <div class="message bot">
                 <strong>Agente:</strong> ¡Hola! Soy tu asistente para descubrir lugares singulares en Paysandú. ¿Qué te gustaría visitar o saber?
             </div>
         </div>
-
         <div id="input-area">
             <input type="text" id="user-input" placeholder="Escribí tu pregunta..." autocomplete="off">
             <button id="send-btn">Enviar</button>
         </div>
-
         <div id="loading-indicator">El agente está pensando...</div>
     </div>
 
-    <!-- Mapa debajo del chat -->
     <div id="map"></div>
 
-    <!-- Lightbox para ampliar fotos -->
     <div id="lightbox">
-        <span class="cerrar">&times;</span>
         <img src="" alt="Foto ampliada">
     </div>
 
-    <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Referencias al DOM ---
             const API_URL = '/api/chat';
+            const API_LUGAR = '/api/lugar';
             const messagesContainer = document.getElementById('messages');
             const userInput = document.getElementById('user-input');
             const sendBtn = document.getElementById('send-btn');
@@ -193,42 +199,38 @@
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = lightbox.querySelector('img');
 
-            if (!messagesContainer || !userInput || !sendBtn || !loadingIndicator) {
-                console.error('Elementos faltantes en el DOM');
-                return;
-            }
+            // Elementos de la tarjeta QR
+            const cardLugar = document.getElementById('card-lugar');
+            const cardCabecera = document.getElementById('card-cabecera');
+            const cardNombre = document.getElementById('card-nombre');
+            const cardBadges = document.getElementById('card-badges');
+            const cardDescripcion = document.getElementById('card-descripcion');
+            const cardDireccion = document.getElementById('card-direccion');
+            const btnPreguntar = document.getElementById('btn-preguntar');
 
-            // --- Mapa con Leaflet ---
+            // --- Mapa ---
             const map = L.map('map').setView([-32.317, -58.080], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 maxZoom: 19,
             }).addTo(map);
-
             const markersLayer = L.layerGroup().addTo(map);
 
             function actualizarMapa(lugares) {
                 markersLayer.clearLayers();
                 if (!lugares || lugares.length === 0) return;
-
                 const bounds = [];
                 lugares.forEach(lugar => {
                     if (lugar.lat == null || lugar.lon == null) return;
                     L.marker([lugar.lat, lugar.lon])
-                        .bindPopup(
-                            `<strong>${lugar.nombre || ''}</strong><br>` +
-                            `${lugar.descripcion_corta || ''}`
-                        )
+                        .bindPopup(`<strong>${lugar.nombre || ''}</strong><br>${lugar.descripcion_corta || ''}`)
                         .addTo(markersLayer);
                     bounds.push([lugar.lat, lugar.lon]);
                 });
-
-                if (bounds.length > 0) {
-                    map.fitBounds(bounds, { padding: [30, 30] });
-                }
+                if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
             }
 
-            // --- Lightbox para fotos ---
+            // --- Lightbox ---
             messagesContainer.addEventListener('click', (e) => {
                 if (e.target.classList.contains('foto-chat')) {
                     lightboxImg.src = e.target.src;
@@ -246,12 +248,10 @@
                 }
             });
 
-            // --- Render de markdown básico (imágenes, negrita, saltos) ---
+            // --- Render de markdown ---
             function renderMarkdown(text) {
-                let html = text.replace(
-                    /!\[([^\]]*)\]\(([^)]+)\)/g,
-                    '<img src="$2" alt="$1" class="foto-chat">'
-                );
+                let html = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+                    '<img src="$2" alt="$1" class="foto-chat">');
                 html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
                 html = html.replace(/\n/g, '<br>');
                 return html;
@@ -266,16 +266,16 @@
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
 
-            // --- Historial y envío de mensajes ---
+            // --- Chat ---
             let conversationHistory = [];
 
-            async function sendMessage() {
-                const text = userInput.value.trim();
+            async function sendMessage(texto = null) {
+                const text = (texto !== null ? texto : userInput.value).trim();
                 if (!text) return;
 
                 addMessage('user', text);
                 conversationHistory.push({ role: 'user', content: text });
-                userInput.value = '';
+                if (texto === null) userInput.value = '';
                 sendBtn.disabled = true;
                 loadingIndicator.style.display = 'block';
 
@@ -285,20 +285,13 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ mensajes: conversationHistory })
                     });
-
                     if (!response.ok) {
                         const errorData = await response.json();
                         throw new Error(errorData.detail || 'Error en el servidor');
                     }
-
                     const data = await response.json();
                     addMessage('bot', data.respuesta);
-                    conversationHistory.push({
-                        role: 'assistant',
-                        content: data.respuesta
-                    });
-
-                    // Actualizar el mapa con los lugares que devolvió el backend
+                    conversationHistory.push({ role: 'assistant', content: data.respuesta });
                     actualizarMapa(data.lugares || []);
                 } catch (error) {
                     console.error('Error:', error);
@@ -310,10 +303,65 @@
                 }
             }
 
-            sendBtn.addEventListener('click', sendMessage);
+            sendBtn.addEventListener('click', () => sendMessage());
             userInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') sendMessage();
             });
+
+            // --- QR: leer ?lugar= y mostrar tarjeta ---
+            const params = new URLSearchParams(window.location.search);
+            const lugarId = params.get('lugar');
+
+            if (lugarId) {
+                fetch(`${API_LUGAR}/${encodeURIComponent(lugarId)}`)
+                    .then(r => {
+                        if (!r.ok) throw new Error('Lugar no encontrado');
+                        return r.json();
+                    })
+                    .then(lugar => {
+                        // Foto o placeholder
+                        if (lugar.fotos && lugar.fotos.length > 0) {
+                            const img = document.createElement('img');
+                            img.className = 'portada';
+                            img.src = lugar.fotos[0];
+                            img.alt = lugar.nombre;
+                            cardCabecera.appendChild(img);
+                        } else {
+                            const ph = document.createElement('div');
+                            ph.className = 'sin-foto';
+                            ph.textContent = '📍';
+                            cardCabecera.appendChild(ph);
+                        }
+
+                        cardNombre.textContent = lugar.nombre;
+
+                        // Badges
+                        const categoria = lugar.categoria || 'otro';
+                        cardBadges.innerHTML = `<span class="badge">${categoria}</span>`;
+                        if (lugar.gratuito) cardBadges.innerHTML += '<span class="badge gratis">Gratis</span>';
+                        cardBadges.innerHTML += `<span class="badge singular">★ ${lugar.singularidad}/5</span>`;
+
+                        cardDescripcion.textContent = lugar.descripcion_larga || lugar.descripcion_corta || '';
+                        cardDireccion.textContent = '📍 ' + (lugar.direccion || 'Dirección no disponible');
+
+                        // Botón: preguntar al agente
+                        btnPreguntar.addEventListener('click', () => {
+                            cardLugar.classList.remove('visible');
+                            sendMessage(`Contame más sobre ${lugar.nombre}`);
+                        });
+
+                        cardLugar.classList.add('visible');
+
+                        // Actualizar mapa con este lugar
+                        if (lugar.lat && lugar.lon) {
+                            actualizarMapa([lugar]);
+                        }
+                    })
+                    .catch(err => {
+                        console.warn('QR no pudo cargar la ficha:', err);
+                        addMessage('bot', `No encontré el lugar "${lugarId}". Probá preguntar por el nombre.`);
+                    });
+            }
         });
     </script>
 </body>

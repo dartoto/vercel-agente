@@ -64,3 +64,12 @@ def chat_endpoint(request: ChatRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+@app.get("/api/lugar/{lugar_id}")
+def obtener_lugar(lugar_id: str):
+    """Devuelve la ficha completa de un lugar por su id."""
+    from db import obtener_ficha
+    ficha = obtener_ficha(lugar_id)
+    if not ficha:
+        raise HTTPException(status_code=404, detail=f"Lugar '{lugar_id}' no encontrado")
+    return ficha
