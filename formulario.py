@@ -9,6 +9,7 @@ import questionary
 import yaml
 from pydantic import ValidationError
 
+import db
 from esquema import Lugar
 from herramientas_datos import geocodificar
 
@@ -91,7 +92,7 @@ def _a_yaml(datos: dict) -> str:
     )
 
 
-def _guardar(datos: dict, sobrescribir: bool = False) -> Path:
+def _guardar_yaml(datos: dict, sobrescribir: bool = False) -> Path:
     DATOS_DIR.mkdir(parents=True, exist_ok=True)
     path = DATOS_DIR / f"{datos['id']}.yaml"
     if path.exists() and not sobrescribir:
@@ -100,13 +101,26 @@ def _guardar(datos: dict, sobrescribir: bool = False) -> Path:
     return path
 
 
+def _sincronizar_turso(datos: dict) -> None:
+    """Intenta escribir el lugar en Turso. No rompe si falla."""
+    try:
+        resultado = db.guardar_lugar_completo(datos, sobrescribir=True)
+        if resultado.get("ok"):
+            accion = resultado.get("accion", "guardado")
+            print(f"☁️  Sincronizado con Turso ({accion}): {resultado['id']}")
+        else:
+            print(f"⚠️  No se pudo sincronizar con Turso: {resultado.get('error')}")
+            print("   El YAML quedó guardado. Sincronizá después con:")
+            print("   ~/vercel-agente-paysandu/sincronizar_turso.sh")
+    except Exception as e:
+        print(f"⚠️  Error al sincronizar con Turso: {type(e).__name__}: {e}")
+        print("   El YAML quedó guardado. Sincronizá después con:")
+        print("   ~/vercel-agente-paysandu/sincronizar_turso.sh")
+
+
 # ---------- Formulario ----------
 
 def preguntar_lugar(datos_iniciales: Optional[dict] = None) -> Optional[dict]:
-    """
-    Guía al usuario por todos los campos. Si datos_iniciales está presente,
-    trabaja en modo edición.
-    """
     editando = datos_iniciales is not None
     datos: dict = dict(datos_iniciales) if datos_iniciales else {}
 
@@ -202,7 +216,6 @@ def preguntar_lugar(datos_iniciales: Optional[dict] = None) -> Optional[dict]:
     lat_default = f"{datos['lat']:.6f}" if datos.get("lat") else ""
     lon_default = f"{datos['lon']:.6f}" if datos.get("lon") else ""
 
-    # En creación, intentar geocodificar automáticamente
     if not editando and datos.get("direccion"):
         print(f"\n  🔍 Intentando geocodificar '{datos['direccion']}'...")
         geo = geocodificar(datos["direccion"])
@@ -224,8 +237,6 @@ def preguntar_lugar(datos_iniciales: Optional[dict] = None) -> Optional[dict]:
         default=lon_default,
     ).ask()
 
-    # Si el usuario deja ambos en blanco, no se guardan coordenadas.
-    # Si pone solo uno, avisamos y omitimos ambos.
     if lat_str and lon_str:
         try:
             datos["lat"] = float(lat_str)
@@ -322,7 +333,7 @@ def preguntar_lugar(datos_iniciales: Optional[dict] = None) -> Optional[dict]:
     if fotos is not None:
         datos["fotos"] = _lista_desde_texto(fotos)
 
-    # Limpiar campos opcionales vacíos (excepto obligatorios)
+    # Limpiar campos opcionales vacíos
     obligatorios = {"id", "nombre", "categoria", "singularidad", "direccion"}
     for k in list(datos.keys()):
         if k not in obligatorios and datos[k] in ("", None):
@@ -358,17 +369,18 @@ def flujo_crear() -> bool:
 
     if accion == "Guardar":
         try:
-            path = _guardar(datos)
+            path = _guardar_yaml(datos)
             print(f"\n✅ Guardado en {path}")
-            print("   Recordá correr 'python cargar_db.py' para actualizar la base.\n")
+            _sincronizar_turso(datos)
             return True
         except FileExistsError as e:
             if questionary.confirm(
                 f"Ya existe {e.args[0].name}. ¿Sobrescribir?",
                 default=False,
             ).ask():
-                path = _guardar(datos, sobrescribir=True)
-                print(f"\n✅ Guardado en {path}\n")
+                path = _guardar_yaml(datos, sobrescribir=True)
+                print(f"\n✅ Guardado en {path}")
+                _sincronizar_turso(datos)
                 return True
     elif accion == "Editar desde cero":
         return flujo_crear()
@@ -426,14 +438,21 @@ def flujo_editar() -> bool:
         print("\n❌ Cambios descartados.\n")
         return False
 
-    path = _guardar(datos_editados, sobrescribir=True)
+    path = _guardar_yaml(datos_editados, sobrescribir=True)
     print(f"\n✅ Actualizado: {path}")
-    print("   Recordá correr 'python cargar_db.py' para actualizar la base.\n")
+    _sincronizar_turso(datos_editados)
     return True
 
 
 def main():
     print("\n📝 Formulario de lugares singulares de Paysandú\n")
+
+    if db.USE_TURSO:
+        print("☁️  Modo Turso activo: los cambios se escriben también en la nube.\n")
+    else:
+        print("💾 Modo SQLite local: los cambios se guardan solo en paysandu.db.\n")
+        print("   Para escribir en Turso, configurá TURSO_DATABASE_URL y")
+        print("   TURSO_AUTH_TOKEN en el .env.\n")
 
     while True:
         accion = questionary.select(
