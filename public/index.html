@@ -10,96 +10,106 @@
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 800px; margin: 0 auto; padding: 20px;
             background: #f4f4f9;
         }
         h1 { color: #333; text-align: center; margin-bottom: 20px; }
 
-        /* Tarjeta de bienvenida del QR */
-        #card-lugar {
-            display: none;
+        /* Barra de ubicación */
+        #barra-ubicacion {
+            display: flex; gap: 10px; align-items: center;
+            margin-bottom: 12px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-            overflow: hidden;
-            margin-bottom: 20px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
-        #card-lugar.visible { display: block; }
-        #card-lugar .cabecera {
-            position: relative;
-        }
-        #card-lugar img.portada {
-            width: 100%;
-            height: 240px;
-            object-fit: cover;
-            display: block;
-            background: #eee;
-        }
-        #card-lugar .sin-foto {
-            width: 100%;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            font-size: 48px;
-        }
-        #card-lugar .cuerpo { padding: 20px; }
-        #card-lugar h2 {
-            margin: 0 0 8px 0;
+        #btn-ubicacion {
+            padding: 8px 14px;
+            background: #f0f4f8;
             color: #2c3e50;
-            font-size: 22px;
+            border: 1px solid #d0d7de;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
         }
-        #card-lugar .badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        #btn-ubicacion:hover { background: #e2e8f0; }
+        #btn-ubicacion.activo {
+            background: #e6f7e6; color: #2e7d32;
+            border-color: #a5d6a7;
+        }
+        #estado-ubicacion {
+            font-size: 13px; color: #666;
+        }
+        #estado-ubicacion.error { color: #c62828; }
+        #estado-ubicacion.ok { color: #2e7d32; }
+
+        /* Sugerencias cuando hay ubicación */
+        #sugerencias {
+            display: none; gap: 8px; flex-wrap: wrap;
             margin-bottom: 12px;
         }
+        #sugerencias.visible { display: flex; }
+        .chip {
+            padding: 8px 14px;
+            background: white;
+            border: 1px solid #d0d7de;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #2c3e50;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        .chip:hover { background: #f0f4f8; }
+
+        /* Tarjeta QR */
+        #card-lugar {
+            display: none; background: white; border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+            overflow: hidden; margin-bottom: 20px;
+        }
+        #card-lugar.visible { display: block; }
+        #card-lugar img.portada {
+            width: 100%; height: 240px; object-fit: cover;
+            display: block; background: #eee;
+        }
+        #card-lugar .sin-foto {
+            width: 100%; height: 120px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white; font-size: 48px;
+        }
+        #card-lugar .cuerpo { padding: 20px; }
+        #card-lugar h2 { margin: 0 0 8px 0; color: #2c3e50; font-size: 22px; }
+        #card-lugar .badges {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+        }
         #card-lugar .badge {
-            background: #e8f1fb;
-            color: #007bff;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            background: #e8f1fb; color: #007bff;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: 600;
         }
         #card-lugar .badge.gratis { background: #e6f7e6; color: #2e7d32; }
         #card-lugar .badge.singular { background: #fff3e0; color: #e65100; }
         #card-lugar p.descripcion {
-            color: #444;
-            line-height: 1.6;
-            margin: 12px 0;
+            color: #444; line-height: 1.6; margin: 12px 0;
         }
         #card-lugar .direccion {
-            color: #666;
-            font-size: 14px;
-            margin: 8px 0 16px 0;
+            color: #666; font-size: 14px; margin: 8px 0 16px 0;
         }
         #card-lugar .boton-agente {
-            padding: 10px 20px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
+            padding: 10px 20px; background: #007bff; color: white;
+            border: none; border-radius: 8px; cursor: pointer;
+            font-size: 15px; font-weight: 600;
         }
         #card-lugar .boton-agente:hover { background: #0056b3; }
 
         #chat-container {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: 70vh;
-            margin-bottom: 20px;
+            background: white; border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px; display: flex; flex-direction: column;
+            height: 60vh; margin-bottom: 20px;
         }
         #messages {
             flex: 1; overflow-y: auto;
@@ -113,20 +123,17 @@
         .foto-chat {
             display: block; max-width: 320px; width: 100%;
             border-radius: 8px; margin-top: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
             cursor: zoom-in;
         }
         #lightbox {
             display: none; position: fixed; inset: 0;
-            background: rgba(0, 0, 0, 0.85); z-index: 1000;
+            background: rgba(0,0,0,0.85); z-index: 1000;
             align-items: center; justify-content: center;
             cursor: zoom-out; padding: 20px;
         }
         #lightbox.abierto { display: flex; }
-        #lightbox img {
-            max-width: 95vw; max-height: 95vh;
-            border-radius: 8px;
-        }
+        #lightbox img { max-width: 95vw; max-height: 95vh; border-radius: 8px; }
         #input-area { display: flex; gap: 10px; }
         #user-input {
             flex: 1; padding: 12px; border: 1px solid #ddd;
@@ -145,25 +152,40 @@
         #map {
             height: 400px; width: 100%;
             border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             z-index: 0;
+        }
+        .marcador-usuario {
+            background: #007bff; border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(0,123,255,0.25);
         }
     </style>
 </head>
 <body>
     <h1>🤖 Agente de Lugares - Paysandú</h1>
 
-    <!-- Tarjeta que aparece al escanear un QR -->
+    <!-- Barra de ubicación -->
+    <div id="barra-ubicacion">
+        <button id="btn-ubicacion">📍 Usar mi ubicación</button>
+        <span id="estado-ubicacion">Sin ubicación</span>
+    </div>
+
+    <!-- Sugerencias que aparecen con ubicación activa -->
+    <div id="sugerencias">
+        <button class="chip" data-msg="¿Qué tengo cerca de mí?">¿Qué tengo cerca?</button>
+        <button class="chip" data-msg="Armame un recorrido de 2 horas caminando desde donde estoy">Armame un recorrido</button>
+        <button class="chip" data-msg="¿Qué lugares gratis tengo cerca?">Gratis cerca</button>
+    </div>
+
+    <!-- Tarjeta QR -->
     <div id="card-lugar">
-        <div class="cabecera" id="card-cabecera"></div>
+        <div id="card-cabecera"></div>
         <div class="cuerpo">
             <h2 id="card-nombre"></h2>
             <div class="badges" id="card-badges"></div>
             <p class="descripcion" id="card-descripcion"></p>
             <p class="direccion" id="card-direccion"></p>
-            <button class="boton-agente" id="btn-preguntar">
-                💬 Preguntale al agente
-            </button>
+            <button class="boton-agente" id="btn-preguntar">💬 Preguntale al agente</button>
         </div>
     </div>
 
@@ -199,7 +221,10 @@
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = lightbox.querySelector('img');
 
-            // Elementos de la tarjeta QR
+            const btnUbicacion = document.getElementById('btn-ubicacion');
+            const estadoUbicacion = document.getElementById('estado-ubicacion');
+            const sugerencias = document.getElementById('sugerencias');
+
             const cardLugar = document.getElementById('card-lugar');
             const cardCabecera = document.getElementById('card-cabecera');
             const cardNombre = document.getElementById('card-nombre');
@@ -207,6 +232,10 @@
             const cardDescripcion = document.getElementById('card-descripcion');
             const cardDireccion = document.getElementById('card-direccion');
             const btnPreguntar = document.getElementById('btn-preguntar');
+
+            // Estado de la ubicación
+            let ubicacionActual = null;  // {lat, lon}
+            let marcadorUsuario = null;
 
             // --- Mapa ---
             const map = L.map('map').setView([-32.317, -58.080], 13);
@@ -227,8 +256,62 @@
                         .addTo(markersLayer);
                     bounds.push([lugar.lat, lugar.lon]);
                 });
+                if (ubicacionActual) bounds.push([ubicacionActual.lat, ubicacionActual.lon]);
                 if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
             }
+
+            function marcarUsuario(lat, lon) {
+                if (marcadorUsuario) marcadorUsuario.remove();
+                const icono = L.divIcon({
+                    className: 'marcador-usuario',
+                    iconSize: [16, 16],
+                });
+                marcadorUsuario = L.marker([lat, lon], { icon: icono })
+                    .bindPopup('Estás acá')
+                    .addTo(map);
+            }
+
+            // --- Ubicación ---
+            btnUbicacion.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    estadoUbicacion.textContent = 'Tu navegador no soporta geolocalización';
+                    estadoUbicacion.className = 'error';
+                    return;
+                }
+
+                estadoUbicacion.textContent = 'Obteniendo ubicación...';
+                estadoUbicacion.className = '';
+
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        ubicacionActual = {
+                            lat: pos.coords.latitude,
+                            lon: pos.coords.longitude,
+                        };
+                        btnUbicacion.textContent = '📍 Ubicación activa';
+                        btnUbicacion.classList.add('activo');
+                        estadoUbicacion.textContent =
+                            `${ubicacionActual.lat.toFixed(4)}, ${ubicacionActual.lon.toFixed(4)}`;
+                        estadoUbicacion.className = 'ok';
+                        sugerencias.classList.add('visible');
+                        marcarUsuario(ubicacionActual.lat, ubicacionActual.lon);
+                        map.setView([ubicacionActual.lat, ubicacionActual.lon], 15);
+                    },
+                    (err) => {
+                        estadoUbicacion.textContent =
+                            err.code === 1
+                                ? 'Permiso denegado. Podés habilitarlo en la configuración del navegador.'
+                                : 'No se pudo obtener la ubicación';
+                        estadoUbicacion.className = 'error';
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            });
+
+            // --- Chips de sugerencia ---
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => sendMessage(chip.dataset.msg));
+            });
 
             // --- Lightbox ---
             messagesContainer.addEventListener('click', (e) => {
@@ -248,7 +331,7 @@
                 }
             });
 
-            // --- Render de markdown ---
+            // --- Render markdown ---
             function renderMarkdown(text) {
                 let html = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
                     '<img src="$2" alt="$1" class="foto-chat">');
@@ -279,11 +362,16 @@
                 sendBtn.disabled = true;
                 loadingIndicator.style.display = 'block';
 
+                const body = { mensajes: conversationHistory };
+                if (ubicacionActual) {
+                    body.ubicacion = ubicacionActual;
+                }
+
                 try {
                     const response = await fetch(API_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ mensajes: conversationHistory })
+                        body: JSON.stringify(body)
                     });
                     if (!response.ok) {
                         const errorData = await response.json();
@@ -308,7 +396,7 @@
                 if (e.key === 'Enter') sendMessage();
             });
 
-            // --- QR: leer ?lugar= y mostrar tarjeta ---
+            // --- QR ---
             const params = new URLSearchParams(window.location.search);
             const lugarId = params.get('lugar');
 
@@ -319,7 +407,6 @@
                         return r.json();
                     })
                     .then(lugar => {
-                        // Foto o placeholder
                         if (lugar.fotos && lugar.fotos.length > 0) {
                             const img = document.createElement('img');
                             img.className = 'portada';
@@ -332,30 +419,21 @@
                             ph.textContent = '📍';
                             cardCabecera.appendChild(ph);
                         }
-
                         cardNombre.textContent = lugar.nombre;
-
-                        // Badges
                         const categoria = lugar.categoria || 'otro';
                         cardBadges.innerHTML = `<span class="badge">${categoria}</span>`;
                         if (lugar.gratuito) cardBadges.innerHTML += '<span class="badge gratis">Gratis</span>';
                         cardBadges.innerHTML += `<span class="badge singular">★ ${lugar.singularidad}/5</span>`;
-
                         cardDescripcion.textContent = lugar.descripcion_larga || lugar.descripcion_corta || '';
                         cardDireccion.textContent = '📍 ' + (lugar.direccion || 'Dirección no disponible');
 
-                        // Botón: preguntar al agente
                         btnPreguntar.addEventListener('click', () => {
                             cardLugar.classList.remove('visible');
                             sendMessage(`Contame más sobre ${lugar.nombre}`);
                         });
 
                         cardLugar.classList.add('visible');
-
-                        // Actualizar mapa con este lugar
-                        if (lugar.lat && lugar.lon) {
-                            actualizarMapa([lugar]);
-                        }
+                        if (lugar.lat && lugar.lon) actualizarMapa([lugar]);
                     })
                     .catch(err => {
                         console.warn('QR no pudo cargar la ficha:', err);

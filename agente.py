@@ -15,7 +15,6 @@ from herramientas import ESQUEMAS, ejecutar
 from prompt import SYSTEM_PROMPT
 
 
-# --- Configuración ---
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 MODELO = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b")
 MAX_PASOS = 6
@@ -29,6 +28,7 @@ PALABRAS_QUE_REQUIEREN_TOOLS = (
     "histórico", "historico", "mural", "natural", "cerca",
     "gratis", "gratuito", "accesible", "raro", "singular",
     "qué hay", "que hay", "qué lugares", "que lugares",
+    "recorrido", "tour", "ruta",
 )
 
 
@@ -64,10 +64,6 @@ def _log_tool_call(nombre: str, argumentos: dict, resultado: dict) -> None:
 
 
 def _ejecutar_tool(nombre: str, argumentos_json: str) -> tuple[str, dict]:
-    """
-    Ejecuta una herramienta y devuelve (json_string, resultado_dict).
-    El primer valor va al LLM; el segundo se usa para acumular lugares.
-    """
     try:
         args = json.loads(argumentos_json) if argumentos_json else {}
     except json.JSONDecodeError as e:
@@ -124,22 +120,17 @@ def _parsear_tool_call_textual(contenido: str) -> dict | None:
 
 
 def _acumular_lugares(resultado: dict, acumulador: list[dict]) -> None:
-    """
-    Extrae lugares de un resultado de herramienta y los agrega al acumulador.
-    Soporta los formatos:
-      - {"lugares": [...]}       (buscar_lugares, buscar_por_nombre, buscar_cerca)
-      - {"lugar": {...}}         (obtener_ficha)
-    """
     if not resultado.get("ok"):
         return
     if isinstance(resultado.get("lugares"), list):
         acumulador.extend(resultado["lugares"])
     elif isinstance(resultado.get("lugar"), dict):
         acumulador.append(resultado["lugar"])
+    elif isinstance(resultado.get("paradas"), list):
+        acumulador.extend(resultado["paradas"])
 
 
 def _deduplicar_lugares(lugares: list[dict]) -> list[dict]:
-    """Quita duplicados por id, manteniendo el orden de aparición."""
     vistos = set()
     unicos = []
     for lugar in lugares:
@@ -150,21 +141,49 @@ def _deduplicar_lugares(lugares: list[dict]) -> list[dict]:
     return unicos
 
 
+def _construir_system_prompt(ubicacion: dict | None) -> str:
+    """Arma el system prompt, agregando la ubicación si está disponible."""
+    if not ubicacion:
+        return SYSTEM_PROMPT
+
+    lat = ubicacion.get("lat")
+    lon = ubicacion.get("lon")
+    if lat is None or lon is None:
+        return SYSTEM_PROMPT
+
+    extra = f"""
+
+# Ubicación del usuario
+El usuario está en estas coordenadas: lat={lat}, lon={lon}.
+
+Reglas cuando hay ubicación:
+- Si pregunta por lugares cercanos ("qué tengo cerca", "qué hay por acá",
+  "qué puedo visitar cerca"), usá `buscar_cerca` con esas coordenadas y un
+  radio razonable (1 a 2 km).
+- Si pide un recorrido o un plan ("armame un tour", "qué hago en 2 horas"),
+  usá `armar_recorrido` pasando `desde_lat` y `desde_lon` con esas coordenadas.
+- NUNCA inventes coordenadas. Usá estas o las que devuelvan las herramientas.
+- Si el usuario menciona un lugar específico, no uses su ubicación para eso:
+  usá `buscar_por_nombre` como siempre.
+"""
+    return SYSTEM_PROMPT + extra
+
+
 def chat(
     mensajes: list[dict],
     cliente: OpenAI | None = None,
     devolver_lugares: bool = False,
+    ubicacion: dict | None = None,
 ):
     """
-    Procesa la conversación y devuelve la respuesta final del agente.
+    Procesa la conversación y devuelve la respuesta final.
 
-    Si `devolver_lugares=True`, devuelve un dict:
-        {"respuesta": str, "lugares": [ {...}, ... ]}
-    Si no, devuelve solo el string de la respuesta (comportamiento clásico).
-
-    `mensajes` se modifica in-place para conservar el historial entre turnos.
+    - `ubicacion`: dict opcional con {"lat": float, "lon": float}. Si se pasa,
+      se inyecta en el system prompt para que el agente sepa dónde está el
+      usuario y pueda usar buscar_cerca / armar_recorrido con esas coordenadas.
     """
     cliente = cliente or _crear_cliente()
+    system_prompt = _construir_system_prompt(ubicacion)
 
     lugares_encontrados: list[dict] = []
 
@@ -182,7 +201,7 @@ def chat(
         try:
             respuesta = cliente.chat.completions.create(
                 model=MODELO,
-                messages=[{"role": "system", "content": SYSTEM_PROMPT}, *mensajes],
+                messages=[{"role": "system", "content": system_prompt}, *mensajes],
                 tools=ESQUEMAS,
                 tool_choice=tool_choice,
                 temperature=TEMPERATURA,
@@ -195,11 +214,8 @@ def chat(
             return msg_error
 
         msg = respuesta.choices[0].message
-
-        # --- Tool calls nativas ---
         tool_calls = _extraer_tool_calls(msg)
 
-        # --- Tool call escrita como texto ---
         if not tool_calls and msg.content:
             parseada = _parsear_tool_call_textual(msg.content)
             if parseada:
@@ -213,7 +229,6 @@ def chat(
                     "arguments": json.dumps(parseada["arguments"], ensure_ascii=False),
                 }]
 
-        # --- Respuesta final sin herramientas ---
         if not tool_calls:
             contenido = msg.content or ""
             mensajes.append({"role": "assistant", "content": contenido})
@@ -224,7 +239,6 @@ def chat(
                 }
             return contenido
 
-        # --- Ejecutar herramientas ---
         mensajes.append({
             "role": "assistant",
             "content": msg.content or "",
