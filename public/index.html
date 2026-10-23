@@ -203,6 +203,16 @@
     </div>
 
     <div id="map"></div>
+    <div id="panel-cercano" style="display:none; margin-top:12px; padding:14px 18px;
+         background:white; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+         border-left:4px solid #007bff;">
+        <div style="font-size:12px; color:#666; text-transform:uppercase;
+             letter-spacing:1px; margin-bottom:4px;">Más cercano</div>
+        <div id="panel-cercano-nombre" style="font-size:17px; font-weight:700;
+             color:#2c3e50; margin-bottom:4px;"></div>
+        <div id="panel-cercano-distancia" style="font-size:14px; color:#007bff;
+             font-weight:600;"></div>
+    </div>
 
     <div id="lightbox">
         <img src="" alt="Foto ampliada">
@@ -232,11 +242,15 @@
             const cardDescripcion = document.getElementById('card-descripcion');
             const cardDireccion = document.getElementById('card-direccion');
             const btnPreguntar = document.getElementById('btn-preguntar');
+            const panelCercano = document.getElementById('panel-cercano');
+            const panelCercanoNombre = document.getElementById('panel-cercano-nombre');
+            const panelCercanoDistancia = document.getElementById('panel-cercano-distancia');
 
             // Estado de la ubicación
             let ubicacionActual = null;  // {lat, lon}
             let marcadorUsuario = null;
-
+            let lineaRecorrido = null;
+            
             // --- Mapa ---
             const map = L.map('map').setView([-32.317, -58.080], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -245,19 +259,103 @@
             }).addTo(map);
             const markersLayer = L.layerGroup().addTo(map);
 
+            function distanciaKm(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const toRad = (d) => d * Math.PI / 180;
+                const dLat = toRad(lat2 - lat1);
+                const dLon = toRad(lon2 - lon1);
+                const a = Math.sin(dLat/2)**2 +
+                          Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                          Math.sin(dLon/2)**2;
+                return 2 * R * Math.asin(Math.sqrt(a));
+            }
+
             function actualizarMapa(lugares) {
                 markersLayer.clearLayers();
+            
+                // Limpiar línea anterior
+                if (lineaRecorrido) {
+                    lineaRecorrido.remove();
+                    lineaRecorrido = null;
+                }
+            
                 if (!lugares || lugares.length === 0) return;
+            
+                // Ordenar por distancia si hay ubicación
+                let lugaresConDistancia = lugares.slice();
+                if (ubicacionActual) {
+                    lugaresConDistancia.forEach(l => {
+                        if (l.lat != null && l.lon != null) {
+                            l._distancia_km = distanciaKm(
+                                ubicacionActual.lat, ubicacionActual.lon,
+                                l.lat, l.lon
+                            );
+                        }
+                    });
+                    lugaresConDistancia.sort((a, b) => (a._distancia_km ?? 999) - (b._distancia_km ?? 999));
+                }
+            
                 const bounds = [];
-                lugares.forEach(lugar => {
+            
+                lugaresConDistancia.forEach((lugar, i) => {
                     if (lugar.lat == null || lugar.lon == null) return;
+            
+                    // Popup con distancia y botón de Google Maps
+                    let popupHtml = `<strong>${lugar.nombre || ''}</strong><br>`;
+                    if (lugar.descripcion_corta) popupHtml += `${lugar.descripcion_corta}<br>`;
+            
+                    if (lugar._distancia_km != null) {
+                        const metros = Math.round(lugar._distancia_km * 1000);
+                        const distTexto = metros < 1000 ? `${metros} m` : `${lugar._distancia_km.toFixed(1)} km`;
+                        popupHtml += `<em>📍 a ${distTexto}</em><br>`;
+            
+                        if (ubicacionActual) {
+                            const gmapsUrl = `https://www.google.com/maps/dir/?api=1` +
+                                `&origin=${ubicacionActual.lat},${ubicacionActual.lon}` +
+                                `&destination=${lugar.lat},${lugar.lon}` +
+                                `&travelmode=walking`;
+                            popupHtml += `<a href="${gmapsUrl}" target="_blank" rel="noopener" ` +
+                                `style="display:inline-block;margin-top:6px;padding:5px 10px;` +
+                                `background:#007bff;color:white;border-radius:6px;text-decoration:none;` +
+                                `font-size:13px;font-weight:600;">🚶 Ir caminando</a>`;
+                        }
+                    }
+            
                     L.marker([lugar.lat, lugar.lon])
-                        .bindPopup(`<strong>${lugar.nombre || ''}</strong><br>${lugar.descripcion_corta || ''}`)
+                        .bindPopup(popupHtml)
                         .addTo(markersLayer);
+            
                     bounds.push([lugar.lat, lugar.lon]);
                 });
+            
+                // Dibujar línea al más cercano (solo si hay ubicación y algún resultado con coordenadas)
+                if (ubicacionActual && lugaresConDistancia.length > 0) {
+                    const masCercano = lugaresConDistancia.find(l => l.lat != null && l.lon != null);
+                    if (masCercano) {
+                        lineaRecorrido = L.polyline(
+                            [
+                                [ubicacionActual.lat, ubicacionActual.lon],
+                                [masCercano.lat, masCercano.lon],
+                            ],
+                            { color: '#007bff', weight: 3, dashArray: '8 6', opacity: 0.8 }
+                        ).addTo(map);
+                    }
+                }
+            
                 if (ubicacionActual) bounds.push([ubicacionActual.lat, ubicacionActual.lon]);
                 if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+                if (ubicacionActual && lugaresConDistancia.length > 0) {
+                        const masCercano = lugaresConDistancia.find(l => l.lat != null && l.lon != null);
+                        if (masCercano && masCercano._distancia_km != null) {
+                            const metros = Math.round(masCercano._distancia_km * 1000);
+                            panelCercanoNombre.textContent = masCercano.nombre || '';
+                            panelCercanoDistancia.textContent =
+                                metros < 1000 ? `A ${metros} metros` : `A ${masCercano._distancia_km.toFixed(1)} km`;
+                            panelCercano.style.display = 'block';
+                        }
+                    } else {
+                        panelCercano.style.display = 'none';
+                    }
             }
 
             function marcarUsuario(lat, lon) {
