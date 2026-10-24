@@ -167,6 +167,7 @@
     <!-- Barra de ubicación -->
     <div id="barra-ubicacion">
         <button id="btn-ubicacion">📍 Usar mi ubicación</button>
+        <button id="btn-centro">🏛️ Usar centro de Paysandú</button>
         <span id="estado-ubicacion">Sin ubicación</span>
     </div>
 
@@ -246,6 +247,7 @@
             const panelCercanoNombre = document.getElementById('panel-cercano-nombre');
             const panelCercanoDistancia = document.getElementById('panel-cercano-distancia');
 
+            const CENTRO_PAYSANDU = { lat: -32.3214, lon: -58.0756 };
             // Estado de la ubicación
             let ubicacionActual = null;  // {lat, lon}
             let marcadorUsuario = null;
@@ -377,6 +379,11 @@
                     return;
                 }
 
+            // Botón para usar el centro de Paysandú (útil en compu o sin GPS)
+                    document.getElementById('btn-centro').addEventListener('click', () => {
+                        activarUbicacion(CENTRO_PAYSANDU.lat, CENTRO_PAYSANDU.lon, 'centro de Paysandú');
+                    });    
+
                 estadoUbicacion.textContent = 'Obteniendo ubicación...';
                 estadoUbicacion.className = '';
 
@@ -428,7 +435,16 @@
                     lightboxImg.src = '';
                 }
             });
-
+            function activarUbicacion(lat, lon, origen) {
+                    ubicacionActual = { lat, lon };
+                    btnUbicacion.classList.add('activo');
+                    btnUbicacion.textContent = '📍 Ubicación activa';
+                    estadoUbicacion.textContent = `${lat.toFixed(4)}, ${lon.toFixed(4)} (${origen})`;
+                    estadoUbicacion.className = 'ok';
+                    sugerencias.classList.add('visible');
+                    marcarUsuario(lat, lon);
+                    map.setView([lat, lon], 15);
+                }
             // --- Render markdown ---
             function renderMarkdown(text) {
                 let html = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
